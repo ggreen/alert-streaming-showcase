@@ -8,8 +8,7 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
-import showcase.alarm.domains.Activity;
-import showcase.alarm.domains.Alert;
+import showcase.streaming.domains.Activity;
 
 import java.time.Duration;
 import java.util.concurrent.Executors;

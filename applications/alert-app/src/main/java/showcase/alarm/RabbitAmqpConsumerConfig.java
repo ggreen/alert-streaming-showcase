@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import showcase.alarm.domains.Activity;
-import showcase.alarm.domains.Alert;
+import showcase.streaming.domains.Activity;
+import showcase.streaming.domains.Alert;
 
 @Configuration
 @Slf4j

@@ -98,6 +98,11 @@
 			<artifactId>spring-cloud-stream-test-binder</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>showcase.streaming.event</groupId>
+			<artifactId>domains</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>

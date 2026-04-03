@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nyla.solutions.core.patterns.repository.memory.ListRepository;
 import org.springframework.stereotype.Component;
-import showcase.alarm.domains.Alert;
+import showcase.streaming.domains.Alert;
 
 import java.util.function.Consumer;
 

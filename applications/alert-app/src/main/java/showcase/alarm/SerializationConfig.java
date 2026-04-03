@@ -3,8 +3,8 @@ package showcase.alarm;
 import nyla.solutions.core.patterns.conversion.Converter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import showcase.alarm.domains.Activity;
-import showcase.alarm.domains.Alert;
+import showcase.streaming.domains.Activity;
+import showcase.streaming.domains.Alert;
 import tools.jackson.databind.ObjectMapper;
 
 @Configuration

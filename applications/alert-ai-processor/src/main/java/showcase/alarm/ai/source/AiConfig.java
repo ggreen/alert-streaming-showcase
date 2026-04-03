@@ -1,26 +1,18 @@
 package showcase.alarm.ai.source;
 
-import io.netty.channel.ChannelOption;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.ChatOptions;
-import org.springframework.ai.ollama.api.OllamaApi;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.ClientHttpRequestFactories;
-import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
-import org.springframework.boot.web.client.RestClientCustomizer;
+//import org.springframework.boot.web.client.ClientHttpRequestFactories;
+//import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
+//import org.springframework.boot.web.client.RestClientCustomizer;
+import org.springframework.boot.restclient.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
-import org.springframework.http.client.ReactorNettyClientRequestFactory;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.http.client.reactive.ReactorNetty2ClientHttpConnector;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
 
@@ -36,19 +28,28 @@ public class AiConfig {
     @Value("${ai.timeouts.seconds.read}")
     private int readTimeoutSeconds;
 
-
-
-    @Bean
-    public RestClientCustomizer restClientCustomizer() {
-        log.info("TIMEOUTS ***  readTimeoutSeconds: {} connectionTimeoutSeconds: {}",readTimeoutSeconds, connectionTimeoutSeconds);
-        return restClientBuilder -> restClientBuilder
+    /*
+            return restClientBuilder -> restClientBuilder
                 .requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
                         .withConnectTimeout(Duration.ofSeconds(connectionTimeoutSeconds))
                         .withReadTimeout(Duration.ofSeconds(readTimeoutSeconds))
                         )
 
                 );
-    }
+     */
+
+
+//    @Bean
+//    public RestClientCustomizer restClientCustomizer() {
+//        log.info("TIMEOUTS ***  readTimeoutSeconds: {} connectionTimeoutSeconds: {}",readTimeoutSeconds, connectionTimeoutSeconds);
+//        return restClientBuilder -> restClientBuilder
+//                .requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
+//                        .withConnectTimeout(Duration.ofSeconds(connectionTimeoutSeconds))
+//                        .withReadTimeout(Duration.ofSeconds(readTimeoutSeconds))
+//                        )
+//
+//                );
+//    }
 
     @Bean
     public RestClient.Builder restClientBuilder() {

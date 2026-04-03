@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.8</version>
+        <version>4.0.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>showcase.alarm</groupId>
@@ -15,8 +15,8 @@
 	<description>alert-ai-source</description>
     <properties>
         <java.version>17</java.version>
-        <spring-ai.version>1.1.2</spring-ai.version>
-        <spring-cloud.version>2025.0.0</spring-cloud.version>
+        <spring-ai.version>2.0.0-M4</spring-ai.version>
+        <spring-cloud.version>2025.1.1</spring-cloud.version>
     </properties>
     <dependencies>
         <dependency>

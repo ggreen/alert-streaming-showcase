@@ -15,6 +15,7 @@
         <module>applications/http-source</module>
         <module>applications/generator-supplier-source</module>
         <module>applications/alert-ai-processor</module>
+        <module>applications/perftest</module>
     </modules>
     <build>
         <pluginManagement>

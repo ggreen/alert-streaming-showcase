@@ -18,9 +18,9 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class PerfTestConfig {
     /**
-     * Loop 3 Million times
+     * Loop 17 Million times
      */
-    private static final Long loopCount = 3000000L;
+    private static final Long loopCount = 17000000L;
 
     @Value("${bathSize:10000}")
     private int batchSize;
@@ -31,7 +31,7 @@ public class PerfTestConfig {
     @Value("${perfTestStreamName:perfTest}")
     private String perfTestStreamName;
 
-    @Value("${eventMessage:That's alot}")
+    @Value("${eventMessage:Test event}")
     private String eventMessage;
 
 

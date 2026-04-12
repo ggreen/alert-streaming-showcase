@@ -64,7 +64,6 @@
             <groupId>showcase.streaming.event</groupId>
             <artifactId>domains</artifactId>
             <version>0.0.1-SNAPSHOT</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

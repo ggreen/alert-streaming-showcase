@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>io.cloudnativedata</groupId>
-	<artifactId>pertfest</artifactId>
+	<artifactId>perftest</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name/>
 	<description/>

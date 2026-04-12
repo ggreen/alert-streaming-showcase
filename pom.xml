@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             http://maven.apache.org/maven-v4_0_0.xsd">
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.ggreen</groupId>
@@ -12,7 +12,7 @@
     <modules>
         <module>components/domains</module>
         <module>applications/alert-app</module>
-        <module>applications/http-source</module>
+        <module>applications/alert-source</module>
         <module>applications/generator-supplier-source</module>
         <module>applications/alert-ai-processor</module>
         <module>applications/perftest</module>

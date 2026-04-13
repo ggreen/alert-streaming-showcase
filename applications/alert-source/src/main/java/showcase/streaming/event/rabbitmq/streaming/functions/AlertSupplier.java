@@ -21,11 +21,6 @@ import java.util.function.Supplier;
 @Slf4j
 public class AlertSupplier implements Supplier<Message<Alert>> {
     private final Iterator<List<String>> csvLines;
-    @Value("${accountEventPrefix:For user }")
-    private String accountEventPrefix="For user ";
-
-    @Value("${accountEventSuffix: }")
-    private String accountEventSuffix = " ";
 
 
     @Override
@@ -37,10 +32,6 @@ public class AlertSupplier implements Supplier<Message<Alert>> {
 
             var event = line.get(4);
             var account = line.get(1);
-
-            if (event != null && !event.contains(account)) {
-                event = accountEventPrefix + account + accountEventSuffix + event;
-            }
 
 
             var alert = Alert.builder()

@@ -29,6 +29,7 @@
                     <tr>
                         <th>Level</th>
                         <th>Time</th>
+                        <th>User</th>
                         <th>Event</th>
                     </tr>
                     </thead>

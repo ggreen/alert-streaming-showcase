@@ -34,6 +34,6 @@ class AlertSupplierTest {
         assertThat(expected.id()).isEqualTo(actual.getPayload().id());
         assertThat(expected.time()).isEqualTo(actual.getPayload().time());
         assertThat(expected.account()).isEqualTo(actual.getPayload().account());
-        assertThat(actual.getPayload().event()).contains(expected.account());
+        assertThat(actual.getPayload().event()).contains(expected.event());
     }
 }

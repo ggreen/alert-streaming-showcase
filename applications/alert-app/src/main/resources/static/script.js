@@ -57,6 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
             row.insertCell().textContent = alert.time;
 
             // Cell 3: Event
+            row.insertCell().textContent = alert.account;
+
+            // Cell 3: Event
             row.insertCell().textContent = alert.event;
 
             // Optional: Highlight entire row for Critical alerts

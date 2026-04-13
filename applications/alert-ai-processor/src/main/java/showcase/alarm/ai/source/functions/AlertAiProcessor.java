@@ -13,6 +13,7 @@ import java.util.function.Function;
 
 /**
  * Alert AI processor
+ * @author gregory green
  */
 
 @Slf4j

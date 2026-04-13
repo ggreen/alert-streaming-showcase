@@ -27,29 +27,4 @@ public class CsvLoadConfig {
         return new CsvReader(resource.getFile()).stream().iterator();
     }
 
-
-    @Bean
-    Supplier<Message<Alert>> alerts(Iterator<List<String>> csvLines) {
-
-        return () -> {
-            if(csvLines.hasNext()) {
-                var line = csvLines.next();
-                log.info("Events {}",line);
-                var alert = Alert.builder()
-                        .id(line.get(0))
-                        .account(line.get(1))
-                        .level(line.get(2))
-                        .time(line.get(3))
-                        .event(line.get(4))
-                        .build();
-
-                return MessageBuilder.withPayload(
-                        alert)
-                        .setHeader("account",alert.account())
-                        .setHeader("level",alert.level())
-                        .build();
-            }
-            return null;
-        };
-    }
 }

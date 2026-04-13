@@ -34,7 +34,6 @@ Restart Apps
 
 Start another instance of the alarm application
 
-```shell
 Start Alarm App
 
 
@@ -48,13 +47,6 @@ open http://localhost:8082
 
 
 # Filtering
-
-
-
-# Partitioning Scalability
-
-
-Artificial Intelligence
 
 
 1. Start Alarm app for all imani alerts
@@ -84,3 +76,9 @@ open http://localhost:8084
 ```shell
 java -jar applications/alert-source/target/alert-source-0.0.1-SNAPSHOT.jar --spring.profiles.active="mqtt" --csv.file="file://$PWD/applications/alert-source/src/main/resources/csv/alerts-filtering.csv"
 ```
+
+
+# Partitioning Scalability
+
+
+Artificial Intelligence

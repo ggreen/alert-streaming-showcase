@@ -124,8 +124,9 @@ class RabbitAmqpConsumerConfig {
 
             try {
                 //Processing input message
-                log.info("Processing input: {}, msg id: {}", alertStream, inputMessage.messageId());
-                alertConsumer.accept(messageConverter.convert(inputMessage.body()));
+                var payload = messageConverter.convert(inputMessage.body());
+                log.info("Received input: {}", payload);
+                alertConsumer.accept(payload);
                 ctx.accept();
             }
             catch (Exception e)

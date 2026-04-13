@@ -20,7 +20,8 @@ public class PerfTestConfig {
     /**
      * Loop 17 Million times
      */
-    private static final Long loopCount = 17000000L;
+    @Value("${messageCount:17000000L}")
+    private long messageCount;
 
     @Value("${bathSize:10000}")
     private int batchSize;
@@ -31,8 +32,8 @@ public class PerfTestConfig {
     @Value("${perfTestStreamName:perfTest}")
     private String perfTestStreamName;
 
-    @Value("${eventMessage:Test event}")
-    private String eventMessage;
+    @Value("${payload:Test event}")
+    private String payload;
 
 
     @Bean
@@ -53,11 +54,9 @@ public class PerfTestConfig {
 
     @Bean
     Message msg(RabbitStreamTemplate template, JsonMapper mapper) {
-        var event = Activity.builder().activity(eventMessage).build();
-        var msgPayload = mapper.writeValueAsString(event);
-        log.info("Sending event: {}", msgPayload);
+        log.info("Sending event: {}", payload);
 
-        return template.messageBuilder().addData(msgPayload.getBytes(StandardCharsets.UTF_8))
+        return template.messageBuilder().addData(payload.getBytes(StandardCharsets.UTF_8))
                 .build();
     }
 
@@ -67,13 +66,13 @@ public class PerfTestConfig {
 
             var start = System.currentTimeMillis();
 
-            for (int i = 0; i < loopCount; i++) {
+            for (int i = 0; i < messageCount; i++) {
 
                 template.send(streamMsg);
             }
 
             var end = System.currentTimeMillis();
-            var thruPut = (loopCount / (end - start)) * 1000;
+            var thruPut = (messageCount / (end - start)) * 1000;
 
             log.info("{} per second", Text.format().formatNumber(thruPut));
         };

@@ -36,7 +36,7 @@ class RabbitAmqpConsumerConfig {
     @Value("${stream.destination.alerts:alerts.alert}")
     private String alertStream;
 
-    @Value("${stream.filter.sql}")
+    @Value("${stream.filter.sql:}")
     private String sqlFilter;
 
     @Value("${stream.alert.filter.value:}")
@@ -120,25 +120,39 @@ class RabbitAmqpConsumerConfig {
             builder = builder.filterValues(alertFilterValue);
         }
 
-        return builder
-                .filter()
-                .sql(sqlFilter)
-                .stream()
-                .builder().messageHandler((ctx,inputMessage) -> {
+        Consumer.MessageHandler handler = (ctx,inputMessage) -> {
 
-                    try {
-                        //Processing input message
-                        log.info("Processing input: {}, msg id: {}", alertStream, inputMessage.messageId());
-                        alertConsumer.accept(messageConverter.convert(inputMessage.body()));
-                    }
-                    catch (Exception e)
-                    {
-                        log.error(Debugger.stackTrace(e));
-                        throw e;
-                    }
+            try {
+                //Processing input message
+                log.info("Processing input: {}, msg id: {}", alertStream, inputMessage.messageId());
+                alertConsumer.accept(messageConverter.convert(inputMessage.body()));
+                ctx.accept();
+            }
+            catch (Exception e)
+            {
+                log.error(Debugger.stackTrace(e));
+                throw e;
+            }
 
-                })
-                .build();
+        };
+
+        if(sqlFilter != null && !sqlFilter.isEmpty())
+        {
+            //Use SQL Filter
+            return builder
+                    .filter()
+                    .sql(sqlFilter)
+                    .stream()
+                    .builder().messageHandler(handler)
+                    .build();
+        }
+        else {
+            //No SQL Filter
+            return builder.builder()
+                    .messageHandler(handler)
+                    .build();
+        }
+
     }
 
     @Bean
@@ -170,6 +184,7 @@ class RabbitAmqpConsumerConfig {
                         //Processing input message
                         log.info("Processing input: {}, msg id: {}", activityStream, inputMessage.messageId());
                         activityConsumer.accept(messageConverter.convert(inputMessage.body()));
+                        ctx.accept();
                     }
                     catch (Exception e)
                     {

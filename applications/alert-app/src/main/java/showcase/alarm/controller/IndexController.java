@@ -17,7 +17,7 @@ public class IndexController {
     public IndexController(
             @Value("${-stream.activity.filter.name:account}")
             String userIdAttribId,
-            @Value("${stream.activity.filter.value}")
+            @Value("${stream.activity.filter.value:}")
             String userId) {
         this.userIdAttribId = userIdAttribId;
         this.userId = userId;

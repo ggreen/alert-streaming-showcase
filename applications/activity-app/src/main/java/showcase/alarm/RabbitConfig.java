@@ -1,28 +1,58 @@
 package showcase.alarm;
 
-import com.rabbitmq.stream.OffsetSpecification;
-import nyla.solutions.core.util.Text;
-import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
-import org.springframework.cloud.stream.config.ListenerContainerCustomizer;
+import com.rabbitmq.stream.Consumer;
+import com.rabbitmq.stream.Environment;
+import lombok.extern.slf4j.Slf4j;
+import nyla.solutions.core.patterns.conversion.Converter;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.rabbit.stream.listener.StreamListenerContainer;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
+import showcase.streaming.domains.Activity;
 
-@Component
+@Configuration
+@Slf4j
 public class RabbitConfig {
 
-    @Bean
-    ListenerContainerCustomizer<MessageListenerContainer> customizer() {
-        return (msgListenerContainer, dest, group) -> {
-            if (msgListenerContainer instanceof StreamListenerContainer streamContainer) {
-                streamContainer.setConsumerCustomizer((name, builder) -> {
+    private int instanceCount = 2;
+    private String superStreamName = "activities.super.stream";
+    @Value("${spring.application.name:activity-app}")
+    private String consumerName;
 
-                    builder.subscriptionListener(
-                            subscriptionContext -> subscriptionContext
-                                    .offsetSpecification(OffsetSpecification.first()));
+    @Bean("streamEnv")
+    Environment env(){
 
-                });
-            }
-        };
+        Environment environment = Environment.builder().build();
+
+        //create stream
+        environment.streamCreator().name(superStreamName)
+                .superStream()
+                .partitions(instanceCount).creator()
+                .create();
+
+        //offset tracking
+
+
+        return environment;
     }
+
+
+    @Bean
+    Consumer consumer(@Qualifier("streamEnv") Environment environment,
+                      Converter<byte[], Activity> converter,
+                      java.util.function.Consumer<Activity> consumer){
+
+        return environment.consumerBuilder()
+                .superStream(superStreamName)
+                .name(consumerName)
+                .singleActiveConsumer()
+//                .noTrackingStrategy()
+                .messageHandler((context, message) -> {
+                    consumer.accept(converter.convert(message.getBodyAsBinary()));
+                })
+                .build();
+    }
+
+
 }

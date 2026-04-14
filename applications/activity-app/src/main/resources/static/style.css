@@ -1,0 +1,151 @@
+:root {
+    --primary-color: #007bff; /* Blue */
+    --bg-color: #121212; /* Dark Background */
+    --card-bg: #1e1e1e; /* Darker Card Color */
+    --text-color: #f0f0f0; /* Light Text */
+    --light-text-color: #a0a0a0; /* Muted Text */
+    --border-color: #333333; /* Dark Border */
+    --shadow-color: rgba(0, 0, 0, 0.4);
+
+    /* Alert Levels */
+    --critical-color: #dc3545; /* Red */
+    --high-color: #ffc107; /* Orange */
+    --medium-color: #17a2b8; /* Cyan */
+    --low-color: #28a745; /* Green */
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 1400px;
+    padding: 20px;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 30px;
+}
+
+.header h1 {
+    margin: 0;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    color: var(--light-text-color);
+}
+
+.user-profile i {
+    font-size: 1.5rem;
+    margin-right: 10px;
+    color: var(--primary-color);
+}
+
+/* Main Grid for Two Tables */
+.main-dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    gap: 30px;
+}
+
+.table-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 5px 20px var(--shadow-color);
+    padding: 20px;
+}
+
+.table-card h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.table-card h2 i {
+    color: var(--primary-color);
+    margin-right: 10px;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+/* Table Styling */
+#alerts-table, #activity-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#alerts-table th, #activity-table th,
+#alerts-table td, #activity-table td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#alerts-table thead th, #activity-table thead th {
+    background-color: var(--border-color);
+    color: var(--text-color);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+#alerts-table tbody tr:hover, #activity-table tbody tr:hover {
+    background-color: #2a2a2a;
+}
+
+/* Alert Level Tag Styling */
+.level-tag {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.level-critical { background-color: var(--critical-color); color: white; }
+.level-high { background-color: var(--high-color); color: #333; }
+.level-medium { background-color: var(--medium-color); color: white; }
+.level-low { background-color: var(--low-color); color: white; }
+
+/* Activity Icon Styling */
+.activity-icon {
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.activity-icon i {
+    color: var(--light-text-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .main-dashboard-grid {
+        grid-template-columns: 1fr; /* Stack tables vertically on smaller screens */
+    }
+}

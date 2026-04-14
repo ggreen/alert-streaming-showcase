@@ -16,6 +16,8 @@
         <module>applications/generator-supplier-source</module>
         <module>applications/alert-ai-processor</module>
         <module>applications/perftest</module>
+        <module>applications/activity-app</module>
+        <module>applications/activity-source</module>
     </modules>
     <build>
         <pluginManagement>

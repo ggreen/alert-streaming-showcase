@@ -80,5 +80,16 @@ java -jar applications/alert-source/target/alert-source-0.0.1-SNAPSHOT.jar --spr
 
 # Partitioning Scalability
 
+```shell
+java -jar applications/activity-source/target/activity-source-0.0.1-SNAPSHOT.jar --csv.file="file://$PWD/applications/activity-source/src/main/resources/csv/activities.csv"
+```
+
+```shell
+java -jar applications/activity-app/target/activity-app-0.0.1-SNAPSHOT.jar --server.port=9901
+```
+
+```shell
+open http://localhost:9901
+```
 
 Artificial Intelligence

@@ -33,3 +33,18 @@ See the instructions
 See instructions
 - [Financial Payment RealTime Fraud Detection Demo Instructions](docs/demo/local/Payments_Alert_SQL.md)
 
+## Cleanup
+
+
+```shell
+rabbitmqadmin delete exchange --name=activities.activity
+rabbitmqadmin delete exchange --name=alerts.alert
+rabbitmqadmin delete exchange --name=alert
+rabbitmqadmin delete queue --name=perfTest
+rabbitmqadmin delete queue --name=activities.activity
+rabbitmqadmin delete exchange --name=activities.super.stream
+rabbitmqadmin delete exchange --name=activityConsumer-in-0
+rabbitmqadmin delete queue --name=activities.super.stream
+rabbitmqadmin delete queue --name=activities.super.stream-0
+rabbitmqadmin delete queue --name=activities.super.stream-1
+```

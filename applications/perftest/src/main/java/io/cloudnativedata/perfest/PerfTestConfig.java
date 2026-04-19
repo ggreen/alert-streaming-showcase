@@ -20,10 +20,10 @@ public class PerfTestConfig {
     /**
      * Loop 17 Million times
      */
-    @Value("${messageCount:17000000L}")
+    @Value("${messageCount:17000000}")
     private long messageCount;
 
-    @Value("${bathSize:10000}")
+    @Value("${batchSize:10000}")
     private int batchSize;
 
     @Value("${subBatchSize:5000}")
@@ -32,8 +32,9 @@ public class PerfTestConfig {
     @Value("${perfTestStreamName:perfTest}")
     private String perfTestStreamName;
 
-    @Value("${payload:Test event}")
-    private String payload;
+    private String payload = """
+        {"event" :"Test event"}
+        """;
 
 
     @Bean

@@ -1,0 +1,7 @@
+applications:
+  - name: activity-source
+    memory: 1G
+    services:
+      - rabbitmq
+    env:
+      JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 21.+}}'

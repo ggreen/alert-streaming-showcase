@@ -38,14 +38,22 @@ See instructions
 
 ```shell
 rabbitmqadmin delete exchange --name=activities.activity
-rabbitmqadrabbitmqadmin delete queue --name=alerts.alertmin delete exchange --name=alerts.alert
+rabbitmqadmin delete  exchange --name=alerts.alert
 rabbitmqadmin delete exchange --name=alert
 rabbitmqadmin delete queue --name=perfTest
 rabbitmqadmin delete queue --name=activities.activity
+rabbitmqadmin delete queue --name=events.super.streams.filtering-0
+rabbitmqadmin delete queue --name=events.super.streams.filtering-1
+rabbitmqadmin delete queue --name=events.spring.io
+rabbitmqadmin delete queue --name=events.super.streams-0
+rabbitmqadmin delete queue --name=events.super.streams-1
 rabbitmqadmin delete queue --name=activities.activity.dlq
 rabbitmqadmin delete queue --name=activities.super.stream-2
 rabbitmqadmin delete exchange --name=activities.super.stream
 rabbitmqadmin delete exchange --name=activityConsumer-in-0
+rabbitmqadmin delete exchange --name=events
+rabbitmqadmin delete exchange --name=events.super.streams
+rabbitmqadmin delete exchange --name=events.super.streams.filtering
 
 rabbitmqadmin delete queue --name=activities.super.stream
 rabbitmqadmin delete queue --name=activities.super.stream-0

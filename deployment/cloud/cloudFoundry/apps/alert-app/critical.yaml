@@ -1,0 +1,14 @@
+applications:
+  - name: alert-critical
+    memory: 1G
+    services:
+      - rabbitmq
+    env:
+      JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 21.+}}'
+      STREAM_FILTER_SQL: "account = 'imani' AND level IN ('critical')"
+      STREAM_ACTIVITY_FILTER_NAME: 'account'
+      STREAM_ACTIVITY_FILTER_VALUE: ''
+      STREAM_ALERT_FILTER_VALUE: ''
+      STREAM_EXCHANGE_BIND_KEY: "#"
+      SPRING_CLOUD_STREAM_BINDINGS_INPUT_DESTINATION : "alerts.alert"
+#      STREAM_ALERT_FILTER_VALUE: 'imani'

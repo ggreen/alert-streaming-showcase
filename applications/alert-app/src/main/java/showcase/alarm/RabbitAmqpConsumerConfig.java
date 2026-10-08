@@ -122,6 +122,8 @@ class RabbitAmqpConsumerConfig {
 
         log.info("input consumed with SQL '{}' from input stream {}",sqlFilter,input.name());
 
+        log.info("alertFilterValue: {}",alertFilterValue);
+
         var builder = connection.consumerBuilder()
                 .queue(input.name())
                 .stream()
@@ -152,6 +154,8 @@ class RabbitAmqpConsumerConfig {
 
         if(sqlFilter != null && !sqlFilter.isEmpty())
         {
+            log.info("Adding filter: {}", sqlFilter);
+
             //Use SQL Filter
             return builder
                     .filter()
@@ -161,6 +165,9 @@ class RabbitAmqpConsumerConfig {
                     .build();
         }
         else {
+
+            log.info("NO SQL Filter");
+
             //No SQL Filter
             return builder.builder()
                     .messageHandler(handler)

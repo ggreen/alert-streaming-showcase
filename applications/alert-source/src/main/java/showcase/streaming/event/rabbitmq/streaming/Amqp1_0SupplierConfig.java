@@ -58,6 +58,9 @@ public class Amqp1_0SupplierConfig {
     @Bean("publisher")
     MessageChannel publisher(Connection connection, Management.QueueInfo streamInfo)
     {
+
+        log.info("Creating publisher with filterProperty: {}", filterProperty);
+
         var publisher =
                 connection
                         .publisherBuilder()
@@ -75,7 +78,7 @@ public class Amqp1_0SupplierConfig {
 
             publisher.publish(msg, context -> {});
 
-            log.info("published {}:{} body:{}", filterProperty,filterValue,body);
+            log.info("published filterProperty:{}, filterValue:{} body:{}", filterProperty,filterValue,body);
             return true;
         };
     }

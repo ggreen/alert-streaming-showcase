@@ -1,0 +1,12 @@
+applications:
+  - name: alert-ai-processor
+    memory: 1G
+    services:
+      - rabbitmq
+      - ai-model-laguna
+      - ai-model-vector-embedding
+    env:
+      JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 21.+}}'
+      STREAM_ACTIVITY_FILTER_VALUE : 'josiah'
+      SPRING_PROFILES_ACTIVE: 'finance'
+      ALERTS_INFERENCE_BATCH: 6

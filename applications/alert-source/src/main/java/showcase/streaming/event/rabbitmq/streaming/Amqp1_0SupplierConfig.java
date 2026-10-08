@@ -43,10 +43,17 @@ public class Amqp1_0SupplierConfig {
     @Value("${spring.cloud.stream.default.contentType:application/json}")
     private String contentType;
 
+    @Value("${spring.rabbitmq.port:5672}")
+    private int port;
 
     @Value("${source.amqp.filter.property.name}")
     private String filterProperty;
 
+    @Value("${spring.rabbitmq.virtual-host:/}")
+    private String virtualHost;
+
+    @Value("${spring.rabbitmq.ssl.enabled:false}")
+    private boolean sslEnabled;
 
     @Bean("publisher")
     MessageChannel publisher(Connection connection, Management.QueueInfo streamInfo)
@@ -83,11 +90,20 @@ public class Amqp1_0SupplierConfig {
     @Bean
     Connection amqpConnection(Environment environment)
     {
-        return environment.connectionBuilder().host(host)
+        var builder = environment.connectionBuilder().host(host)
+                .host(host)
+                .port(port)
                 .name(name)
                 .username(username)
                 .password(password)
-                .build();
+                .virtualHost(virtualHost);
+
+
+        if (sslEnabled) {
+            builder.tls();
+        }
+
+        return builder.build();
     }
 
     @Bean

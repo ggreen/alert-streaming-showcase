@@ -1,0 +1,8 @@
+applications:
+  - name: generator-supplier-source
+    memory: 1G
+    services:
+      - rabbitmq
+    env:
+      JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 21.+}}'
+      GENERATOR_PROPERTIES_TYPES: 'id=String;account=String;level=String;time=String;event=String'

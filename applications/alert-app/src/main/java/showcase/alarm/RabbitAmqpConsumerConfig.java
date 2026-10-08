@@ -28,6 +28,8 @@ class RabbitAmqpConsumerConfig {
     @Value("${spring.rabbitmq.password:guest}")
     private String password;
 
+    @Value("${spring.rabbitmq.port:5672}")
+    private int port;
 
     @Value("${stream.filter.offset:FIRST}")
     private String offsetName;
@@ -66,6 +68,9 @@ class RabbitAmqpConsumerConfig {
     @Value("${stream.activity.exchange.bind.key:#}")
     private String activityBindRoutingKey;
 
+    @Value("${spring.rabbitmq.virtual-host:/}")
+    private String virtualHost;
+
 
     @Bean
     Environment amqpEnvironment()
@@ -75,6 +80,8 @@ class RabbitAmqpConsumerConfig {
                 .host(host)
                 .username(username)
                 .password(password)
+                .port(port)
+                .virtualHost(virtualHost)
                 .environmentBuilder()
                 .build();
     }
@@ -84,8 +91,11 @@ class RabbitAmqpConsumerConfig {
     {
         return environment.connectionBuilder().host(host)
                 .name(applicationName)
+                .host(host)
                 .username(username)
                 .password(password)
+                .port(port)
+                .virtualHost(virtualHost)
                 .build();
     }
 
@@ -94,8 +104,11 @@ class RabbitAmqpConsumerConfig {
     {
         return environment.connectionBuilder().host(host)
                 .name(applicationName)
+                .host(host)
                 .username(username)
                 .password(password)
+                .port(port)
+                .virtualHost(virtualHost)
                 .build();
     }
 

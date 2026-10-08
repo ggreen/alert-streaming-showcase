@@ -1,0 +1,11 @@
+applications:
+  - name: alert-source
+    memory: 1G
+    services:
+      - rabbitmq
+    env:
+      JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 21.+}}'
+      SPRING_PROFILES_ACTIVE: 'amqp1.0'
+      SPRING_CLOUD_STREAM_BINDINGS_OUTPUT_DESTINATION: 'alerts.alert'
+      SOURCE_AMQP_FILTER_PROPERTY_NAME: 'id'
+      SOURCE_AMQP_FILTER_PROPERTY_VALUE: 'imani'

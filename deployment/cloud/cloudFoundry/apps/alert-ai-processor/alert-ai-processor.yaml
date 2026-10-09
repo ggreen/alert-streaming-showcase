@@ -10,3 +10,10 @@ applications:
       STREAM_ACTIVITY_FILTER_VALUE : 'josiah'
       SPRING_PROFILES_ACTIVE: 'finance'
       ALERTS_INFERENCE_BATCH: 6
+      SPRING_RABBITMQ_STREAM_HOST: '${vcap.services.rabbitmq.credentials.hostname}'
+      SPRING_RABBITMQ_HOST: '${vcap.services.rabbitmq.credentials.hostname}'
+      SPRING_RABBITMQ_STREAM_PORT: 5552 # Or SSL stream port 5551
+      SPRING_RABBITMQ_STREAM_USERNAME: '${vcap.services.rabbitmq.credentials.username}'
+      SPRING_RABBITMQ_STREAM_PASSWORD: '${vcap.services.rabbitmq.credentials.password}'
+      SPRING_RABBITMQ_USERNAME: '${vcap.services.rabbitmq.credentials.username}'
+      SPRING_RABBITMQ_PASSWORD: '${vcap.services.rabbitmq.credentials.password}'

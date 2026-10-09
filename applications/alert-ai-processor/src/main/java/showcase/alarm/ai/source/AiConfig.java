@@ -100,8 +100,6 @@ public class AiConfig {
 
         return ChatClient
                 .builder(chatModel)
-                .defaultOptions(ChatOptions.builder()
-                        .build())
                 .build();
     }
 }

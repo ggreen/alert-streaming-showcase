@@ -1,14 +1,14 @@
 package showcase.alarm.ai.source;
 
+import com.rabbitmq.stream.Environment;
 import com.rabbitmq.stream.OffsetSpecification;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.function.context.config.JsonMessageConverter;
 import org.springframework.cloud.function.json.JacksonMapper;
-import org.springframework.cloud.stream.config.ListenerContainerCustomizer;
 import org.springframework.cloud.stream.config.ProducerMessageHandlerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +17,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.rabbit.stream.config.StreamRabbitListenerContainerFactory;
 import org.springframework.rabbit.stream.listener.StreamListenerContainer;
 import org.springframework.rabbit.stream.producer.RabbitStreamTemplate;
 import org.springframework.rabbit.stream.support.StreamMessageProperties;
@@ -34,32 +35,54 @@ public class RabbitConfig {
     @Value("${stream.activity.filter.name:account}")
     private String filterPropName;
 
+
     @Bean
-    ListenerContainerCustomizer<MessageListenerContainer> customizer() {
-        return (cont, dest, group) -> {
-            if(cont instanceof StreamListenerContainer container)
-            {
-                //set filter
-                container.setConsumerCustomizer((name, builder) -> {
+    RabbitListenerContainerFactory<StreamListenerContainer> nativeFactory(Environment env) {
+        StreamRabbitListenerContainerFactory factory = new StreamRabbitListenerContainerFactory(env);
+        factory.setNativeListener(true);
+        factory.setConsumerCustomizer((id, builder) -> {
+            builder.noTrackingStrategy()
+                    .filter().values(filterValue)
+                    .postFilter( message ->
+                            {
+                                return filterValue.equals(message
+                                        .getApplicationProperties()
+                                        .get(filterPropName));
+                            }
 
-                    log.info("Filtering consumer with value: {}",filterValue);
-                    builder.noTrackingStrategy()
-                            .filter().values(filterValue)
-                                    .postFilter( message ->
-                                            {
-                                                return filterValue.equals(message
-                                                        .getApplicationProperties()
-                                                        .get(filterPropName));
-                                            }
+                    );
 
-                                            );
-
-                    builder.offset(OffsetSpecification.first());
-
-                });
-            }
-        };
+            builder.offset(OffsetSpecification.first());
+        });
+        return factory;
     }
+
+//    @Bean
+//    ListenerContainerCustomizer<MessageListenerContainer> customizer() {
+//        return (cont, dest, group) -> {
+//            if(cont instanceof StreamListenerContainer container)
+//            {
+//                //set filter
+//                container.setConsumerCustomizer((name, builder) -> {
+//
+//                    log.info("Filtering consumer with value: {}",filterValue);
+//                    builder.noTrackingStrategy()
+//                            .filter().values(filterValue)
+//                                    .postFilter( message ->
+//                                            {
+//                                                return filterValue.equals(message
+//                                                        .getApplicationProperties()
+//                                                        .get(filterPropName));
+//                                            }
+//
+//                                            );
+//
+//                    builder.offset(OffsetSpecification.first());
+//
+//                });
+//            }
+//        };
+//    }
 
     @Bean
     org.springframework.messaging.converter.MessageConverter messageConverter(JsonMapper objectMapper)

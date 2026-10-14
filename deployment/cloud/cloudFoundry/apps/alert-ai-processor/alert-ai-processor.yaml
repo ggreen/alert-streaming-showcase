@@ -17,3 +17,5 @@ applications:
       SPRING_RABBITMQ_STREAM_PASSWORD: '${vcap.services.rabbitmq.credentials.password}'
       SPRING_RABBITMQ_USERNAME: '${vcap.services.rabbitmq.credentials.username}'
       SPRING_RABBITMQ_PASSWORD: '${vcap.services.rabbitmq.credentials.password}'
+      SPRING_AI_MODEL_CHAT: 'openai'
+#      SPRING_AI_OPENAI_API-KEY: '${vcap.services.<service-instance-name>.credentials.api_key:${SPRING_AI_OPENAI_API_KEY:}}'

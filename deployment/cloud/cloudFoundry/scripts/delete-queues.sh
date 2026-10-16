@@ -1,9 +1,18 @@
 #!/bin/bash
 
-# Configuration
-QUEUE_NAME="activities.activity"
+export RABBIT_USERNAME=$(cf service-key rabbitmq rabbit-key | tail -n +3 | jq -r '.credentials.username')
+export RABBIT_PASSWORD=$(cf service-key rabbitmq rabbit-key | tail -n +3 | jq -r '.credentials.password')
+export RABBIT_VHOST=$(cf service-key rabbitmq rabbit-key | tail -n +3 | jq -r '.credentials.vhost')
+export RABBIT_URL=$(cf service-key rabbitmq rabbit-key | tail -n +3 | jq -r '.credentials.dashboard_url')
+echo "RabbitMQ User $RABBIT_USERNAME , Password:$RABBIT_PASSWORD vhost: $RABBIT_VHOST"
 
-# Function to URL-encode strings using pure bash (handles special characters like '/')
+# List of queues to remove
+QUEUES=(
+  "activities.activity"
+  "alerts.alert"
+)
+
+# Function to URL-encode strings using pure bash
 urlencode() {
   local string="${1}"
   local length="${#string}"
@@ -19,16 +28,23 @@ urlencode() {
 
 ENCODED_VHOST=$(urlencode "${RABBIT_VHOST}")
 
-# Delete the queue using RabbitMQ Management HTTP API
-response=$(curl -s -o /dev/null -w "%{http_code}" \
-  -X DELETE \
-  -u "${RABBIT_USERNAME}:${RABBIT_PASSWORD}" \
-  "${RABBIT_URL}/api/queues/${RABBIT_VHOST}/${QUEUE_NAME}")
+echo "Starting queue deletion for vhost '${RABBIT_VHOST}'..."
+echo "----------------------------------------------------"
 
-if [ "$response" -eq 204 ]; then
-  echo "Queue '${QUEUE_NAME}' in vhost '${RABBIT_VHOST}' deleted successfully."
-elif [ "$response" -eq 404 ]; then
-  echo "Error: Queue '${QUEUE_NAME}' or vhost '${VHOST}' not found (HTTP 404)."
-else
-  echo "Failed to delete queue. HTTP response status code: ${response}"
-fi
+# Iterate through the list of queues
+for QUEUE_NAME in "${QUEUES[@]}"; do
+  ENCODED_QUEUE=$(urlencode "${QUEUE_NAME}")
+
+  response=$(curl -s -o /dev/null -w "%{http_code}" \
+    -X DELETE \
+    -u "${RABBIT_USERNAME}:${RABBIT_PASSWORD}" \
+    "${RABBIT_URL}/api/queues/${ENCODED_VHOST}/${ENCODED_QUEUE}")
+
+  if [ "$response" -eq 204 ]; then
+    echo "✔ Queue '${QUEUE_NAME}' deleted successfully."
+  elif [ "$response" -eq 404 ]; then
+    echo "✖ Error: Queue '${QUEUE_NAME}' or vhost '${RABBIT_VHOST}' not found (HTTP 404)."
+  else
+    echo "✖ Failed to delete queue '${QUEUE_NAME}'. HTTP status code: ${response}"
+  fi
+done

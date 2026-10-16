@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHeaders;
 import showcase.streaming.event.rabbitmq.streaming.constants.MessagingConstants;
 
 import java.nio.charset.StandardCharsets;
@@ -56,8 +57,7 @@ public class Amqp1_0SupplierConfig {
     private boolean sslEnabled;
 
     @Bean("publisher")
-    MessageChannel publisher(Connection connection, Management.QueueInfo streamInfo)
-    {
+    MessageChannel publisher(Connection connection, Management.QueueInfo streamInfo) {
 
         log.info("Creating publisher with filterProperty: {}", filterProperty);
 
@@ -67,18 +67,28 @@ public class Amqp1_0SupplierConfig {
                         .queue(streamInfo.name())
                         .build();
 
-        return (message,timeout) -> {
-            String body = (String)message.getPayload();
-            String filterValue = message.getHeaders().get(MessagingConstants.TOPIC_HEADER, String.class);
+        return (message, timeout) -> {
+            String body = (String) message.getPayload();
+            MessageHeaders headers = message.getHeaders();
+            String filterValue = headers.get(MessagingConstants.TOPIC_HEADER, String.class);
+
             var msg = publisher
                     .message(body.getBytes(StandardCharsets.UTF_8))
                     .annotation(MessagingConstants.FILTER_VALUE_NM, filterValue)
                     .contentType(contentType)
                     .property(filterProperty, filterValue);
 
+            // Map all custom Spring message headers into stream message properties
+            headers.forEach((key, value) -> {
+                // Exclude Spring internal headers (e.g., id, timestamp) if desired
+                if (value != null && !MessageHeaders.ID.equals(key) && !MessageHeaders.TIMESTAMP.equals(key)) {
+                    msg.property(key, value.toString());
+                }
+            });
+
             publisher.publish(msg, context -> {});
 
-            log.info("published filterProperty:{}, filterValue:{} body:{}", filterProperty,filterValue,body);
+            log.info("Published filterProperty: {}, filterValue: {}, body: {}", filterProperty, filterValue, body);
             return true;
         };
     }

@@ -15,7 +15,6 @@ import java.util.function.Supplier;
 @Slf4j
 public class ActivitySupplier implements Supplier<Activity> {
     private int idSequence;
-    private final Digits digits = new Digits();
 
     private final CsvReader csvReader;
 
@@ -42,10 +41,10 @@ public class ActivitySupplier implements Supplier<Activity> {
         log.info("row: {}",row);
 
         var  activity = Activity.builder()
-                .id(id())
                 .time(Text.format().formatDate("hh:mm a ss S ", new Date()))
-                .activity(row.get(0))
+                .account(row.get(0))
                 .icon(row.get(1))
+                .activity(row.get(2))
                 .build();
         log.info("activity: {}",activity);
         return activity;

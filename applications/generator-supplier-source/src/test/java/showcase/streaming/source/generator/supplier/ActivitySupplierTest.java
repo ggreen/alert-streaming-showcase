@@ -38,7 +38,7 @@ class ActivitySupplierTest {
     @Test
     void get() {
         when(csvReader.size()).thenReturn(1);
-        List<String> row = asList("icon","Running activity");
+        List<String> row = asList("junit","icon","Running activity");
         when(csvReader.row(anyInt())).thenReturn(row);
 
         subject = new ActivitySupplier(idSequenceStart,csvReader);
@@ -47,7 +47,7 @@ class ActivitySupplierTest {
 
         println(actual);
         assertThat(actual).isNotNull();
-        assertThat(actual.id()).isNotNull();
+        assertThat(actual.id()).isNull();
         assertThat(actual.time()).isNotNull();
         assertThat(actual.activity()).isNotNull();
         assertThat(actual.icon()).isNotNull();

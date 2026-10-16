@@ -5,6 +5,7 @@ import com.rabbitmq.client.amqp.Environment;
 import com.rabbitmq.client.amqp.Management;
 import com.rabbitmq.client.amqp.impl.AmqpEnvironmentBuilder;
 import lombok.extern.slf4j.Slf4j;
+import nyla.solutions.core.util.Text;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -82,13 +83,16 @@ public class Amqp1_0SupplierConfig {
             headers.forEach((key, value) -> {
                 // Exclude Spring internal headers (e.g., id, timestamp) if desired
                 if (value != null && !MessageHeaders.ID.equals(key) && !MessageHeaders.TIMESTAMP.equals(key)) {
-                    msg.property(key, value.toString());
+
+                    var msgPropertyName = key.toLowerCase();
+                    log.info("Property name: {}, value: {}", msgPropertyName,value);
+                    msg.property(msgPropertyName, value.toString());
                 }
             });
 
             publisher.publish(msg, context -> {});
 
-            log.info("Published filterProperty: {}, filterValue: {}, body: {}", filterProperty, filterValue, body);
+            log.info("Published filterProperty: {}, filterValue: {}, body: {}", filterProperty, filterValue,body);
             return true;
         };
     }

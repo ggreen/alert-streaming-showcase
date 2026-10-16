@@ -11,6 +11,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import showcase.streaming.domains.Alert;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
@@ -24,6 +25,13 @@ public class CsvLoadConfig {
 
     @Bean
     Iterator<List<String>> csvLines() throws IOException {
+
+        // Safe check for null or non-existent resource
+        if (resource == null || !resource.exists()) {
+            log.warn("CSV resource is empty or not found. Skipping load.");
+            return (Iterator)Collections.emptyList().iterator();
+        }
+
         return new CsvReader(resource.getFile()).stream().iterator();
     }
 

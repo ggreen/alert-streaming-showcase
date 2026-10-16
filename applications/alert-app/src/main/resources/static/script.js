@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderAlerts() {
         alertsData.forEach(alert => {
 
-            var alertRowId = "alertRow"+alert.id;
+            var alertRowId = "alertRow" + alert.id;
 
             const existingRow = document.getElementById(alertRowId);
 
@@ -48,19 +48,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const row = alertsTableBody.insertRow();
             row.id = alertRowId;
-            const level = alert.level.toLowerCase();
+
+            // Safely extract and normalize level (handles null/undefined)
+            const rawLevel = alert.level ?? '';
+            const level = rawLevel.toLowerCase();
 
             // Cell 1: Level Tag
-            row.insertCell().innerHTML = `<span class="level-tag level-${level}">${alert.level}</span>`;
+            row.insertCell().innerHTML = `<span class="level-tag level-${level}">${rawLevel || 'N/A'}</span>`;
 
             // Cell 2: Time
-            row.insertCell().textContent = alert.time;
+            row.insertCell().textContent = alert.time ?? '';
 
-            // Cell 3: Event
-            row.insertCell().textContent = alert.account;
+            // Cell 3: Account
+            row.insertCell().textContent = alert.account ?? '';
 
-            // Cell 3: Event
-            row.insertCell().textContent = alert.event;
+            // Cell 4: Event
+            row.insertCell().textContent = alert.event ?? '';
 
             // Optional: Highlight entire row for Critical alerts
             if (level === 'critical') {

@@ -76,16 +76,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderActivity() {
         activityData.forEach(activity => {
 
-
          var activityRowId = "activityRow"+activity.id;
          const existingRow = document.getElementById(activityRowId);
 
-         if (existingRow) {
+         if (activity.id != null && existingRow) {
             return; //skip
          }
 
          const row = activityTableBody.insertRow();
-         row.id = activityRowId;
+         if(activity.id != null)
+            row.id = activityRowId;
 
          // Cell 1: Icon
          row.insertCell().innerHTML = `<div class="activity-icon"><i class="fas ${activity.icon}"></i></div>`;

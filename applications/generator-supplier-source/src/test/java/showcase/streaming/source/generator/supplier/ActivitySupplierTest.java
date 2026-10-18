@@ -47,7 +47,7 @@ class ActivitySupplierTest {
 
         println(actual);
         assertThat(actual).isNotNull();
-        assertThat(actual.id()).isNull();
+        assertThat(actual.id()).isNotNull();
         assertThat(actual.time()).isNotNull();
         assertThat(actual.activity()).isNotNull();
         assertThat(actual.icon()).isNotNull();

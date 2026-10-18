@@ -18,6 +18,9 @@ public class ActivitySupplier implements Supplier<Activity> {
 
     private final CsvReader csvReader;
 
+    private int counter = 0;
+
+
     public ActivitySupplier(@Value("${generator.activity.id.start:0}") int idSequence,
                             CsvReader csvReader) {
         if(csvReader.isEmpty())
@@ -41,6 +44,7 @@ public class ActivitySupplier implements Supplier<Activity> {
         log.info("row: {}",row);
 
         var  activity = Activity.builder()
+                .id(String.valueOf(counter++))
                 .time(Text.format().formatDate("hh:mm a ss S ", new Date()))
                 .account(row.get(0))
                 .icon(row.get(1))

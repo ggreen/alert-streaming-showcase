@@ -18,11 +18,20 @@
             <span>${account}</span>
         </div>
     </header>
-
     <div class="main-dashboard-grid">
 
         <div class="table-card alert-table-card">
             <h2><i class="fas fa-exclamation-triangle"></i> Security Alerts</h2>
+
+            <!-- SQL Filter Section -->
+            <div id="sql-filter-container" class="sql-filter-wrapper" style="display: none;">
+                <div class="sql-filter-header">
+                    <i class="fas fa-filter"></i>
+                    <span>Active Filter</span>
+                </div>
+                <pre class="sql-code-block"><code id="sql-filter-text"></code></pre>
+            </div>
+
             <div class="table-container">
                 <table id="alerts-table">
                     <thead>
@@ -59,6 +68,15 @@
     </div>
 </div>
 
+<script>
+    $(document).ready(function () {
+        const rawSqlFilter = `${alertWhereSqlFilter}`.trim();
+        if (rawSqlFilter) {
+            $('#sql-filter-text').text(rawSqlFilter);
+            $('#sql-filter-container').show();
+        }
+    });
+</script>
 <script src="script.js"></script>
 </body>
 </html>

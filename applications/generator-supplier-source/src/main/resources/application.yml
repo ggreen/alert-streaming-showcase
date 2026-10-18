@@ -30,10 +30,10 @@ generator:
   alert:
     account: system
     levels:
-      - "Critical"
-      - "High"
-      - "Medium"
-      - "Low"
+      - "critical"
+      - "high"
+      - "medium"
+      - "low"
     events:
     - Break-in Detected (Alarm Triggered)
     - Garage Door Left Open for >10 min

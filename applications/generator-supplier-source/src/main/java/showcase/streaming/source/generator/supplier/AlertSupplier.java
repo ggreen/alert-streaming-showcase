@@ -3,6 +3,8 @@ package showcase.streaming.source.generator.supplier;
 import lombok.extern.slf4j.Slf4j;
 import nyla.solutions.core.util.Digits;
 import nyla.solutions.core.util.Text;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 import showcase.streaming.domains.Alert;
 import showcase.streaming.source.generator.properties.AlertProperties;
@@ -15,7 +17,7 @@ import java.util.function.Supplier;
 
 @Component
 @Slf4j
-public class AlertSupplier implements Supplier<Alert> {
+public class AlertSupplier implements Supplier<Message<Alert>> {
 
     private final String account;
     private final List<String> events;
@@ -44,7 +46,7 @@ public class AlertSupplier implements Supplier<Alert> {
     }
 
     @Override
-    public Alert get() {
+    public Message<Alert> get() {
 
         var alert = Alert.builder().id(id())
                 .level(level())
@@ -54,7 +56,10 @@ public class AlertSupplier implements Supplier<Alert> {
                 .build();
 
         log.info("Generator alert: {}",alert);
-        return alert;
+        return MessageBuilder.withPayload(alert)
+                .setHeader("level",alert.level())
+                .setHeader("account",alert.account())
+                .build();
     }
 
     private String event() {

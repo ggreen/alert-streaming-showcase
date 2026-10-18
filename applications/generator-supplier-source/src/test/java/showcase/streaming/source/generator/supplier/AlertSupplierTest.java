@@ -78,6 +78,8 @@ class AlertSupplierTest {
         var actual = subject.get();
         println(actual);
         assertThat(actual).isNotNull();
+        assertThat(actual.getHeaders().get("account")).isNotNull();
+        assertThat(actual.getHeaders().get("level")).isNotNull();
     }
 
 }

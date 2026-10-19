@@ -11,6 +11,7 @@ import io.cloudNativeData.alarm.ai.source.service.ai.AlertsModelInference;
 import showcase.streaming.domains.Activity;
 import showcase.streaming.domains.Alert;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,11 +57,15 @@ class InMemoryAlDetectorServiceTest {
     @Test
     void given_hasDetected_Alert_summaryHasAlerts() {
 
-        List<Alert> expected = List.of(alert,alert);
-        var activities = List.of(activity,activity);
+        List<Activity> activities = new ArrayList<>(
+                List.of(activity,activity)
+        );
 
-        when(activityRepository.findAll())
-                .thenReturn(activities);
+        subject = new InMemoryAlDetectorService(new ListRepository<>(activities), alertsModelinference,1,delayMs,
+                maxAlertCount);
+
+        List<Alert> expected = List.of(alert,alert);
+
         when(alertsModelinference.determineAlert(activities)).thenReturn(expected);
 
         var before = subject.summarize();
@@ -71,6 +76,8 @@ class InMemoryAlDetectorServiceTest {
 
         assertThat(before.getAlertCount()).isEqualTo(expected.size());
         assertThat(after.getAlertRecords()).hasSize(1);
+        assertThat(after.getAlertRecords().iterator().next().activities()).hasSize(3);
+        assertThat(after.getAlertRecords().iterator().next().alerts()).isNotEmpty();
     }
 
     @Test

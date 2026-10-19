@@ -12,6 +12,8 @@ import io.cloudNativeData.alarm.ai.source.service.ai.AlertsModelInference;
 import showcase.streaming.domains.Activity;
 import showcase.streaming.domains.Alert;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 
@@ -32,6 +34,7 @@ public class InMemoryAlDetectorService implements AlertDetectorService{
 
     private Long lastCheckTime = null;
     private final ProcessSummary summary;
+    private List<Activity> activitiesMemento;
 
     public InMemoryAlDetectorService(ListRepository<Activity> activityRepository,
                                      AlertsModelInference modelInference,
@@ -73,10 +76,9 @@ public class InMemoryAlDetectorService implements AlertDetectorService{
 
         if(detectedAlerts != null && !detectedAlerts.isEmpty()){
 
-            var activities = (List<Activity>) activityRepository.findAll();
 
             summary.getAlertRecords().add(AlertRecord.builder()
-                            .activities(activities)
+                            .activities( activitiesMemento)
                             .alerts(detectedAlerts)
                     .build());
 
@@ -87,7 +89,7 @@ public class InMemoryAlDetectorService implements AlertDetectorService{
         return detectedAlerts;
     }
 
-    @Override
+//    @Override
     public synchronized List<Alert> checkForAlerts() {
         long currentTime= System.currentTimeMillis();
         var activities = (List<Activity>) activityRepository.findAll();
@@ -115,11 +117,16 @@ public class InMemoryAlDetectorService implements AlertDetectorService{
 
     @Nullable
     private List<Alert> getAlerts(List<Activity> activities) {
+
+        activitiesMemento = activities;
+
         var alerts = this.modelInference.determineAlert(activities);
 
         if(alerts != null && !alerts.isEmpty())
         {
             log.info("Deleting activities from repository");
+
+
             activityRepository.deleteAll();
         }
 

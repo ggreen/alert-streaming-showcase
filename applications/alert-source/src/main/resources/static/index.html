@@ -105,11 +105,11 @@
             </div>
             <select id="presetSelect" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 transition">
                 <option value="" disabled selected>-- Choose a sample incident template --</option>
-                <option value="example">Original Example (Johannesburg Login)</option>
-                <option value="suspicious_login">Suspicious Online Banking Login</option>
-                <option value="unauthorized_withdrawal">Unauthorized Large Withdrawal</option>
-                <option value="rate_limit">API Rate Limit Exceeded</option>
-                <option value="db_storage">Database Storage Capacity Warning</option>
+                <option value="pins_incorrect">Suspicious Incorrect PINs entered</option>
+                <option value="account_threshold">Low Account Balance</option>
+                <option value="change_password">Change Password</option>
+                <option value="ira_reminder">Roth IRA Reminder</option>
+                <option value="new_card">Database Storage Capacity Warning</option>
                 <option value="brute_force">SSH Brute Force Attack Detected</option>
             </select>
         </div>
@@ -370,40 +370,40 @@
 
     // Presets Database
     const PRESETS = {
-        example: {
-            id: "11",
+        pins_incorrect: {
+            id: "01",
             account: "imani",
             level: "critical",
-            time: "11:15 AM",
-            event: "Multiple failed login attempts on online banking portal from suspicious IP in Johannesburg, South Africa"
+            time: "5:00AM",
+            event: "Multiple ATM pin numbers entries incorrect at location in Jersey City, New Jersey"
         },
-        suspicious_login: {
-            id: "102",
-            account: "alex_dev",
+        account_threshold: {
+            id: "02",
+            account: "imani",
             level: "high",
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            event: "Impossible travel detected: Account logged in from Tokyo and Frankfurt within 5 minutes"
+            event: "Account balance just dropped below threshold!"
         },
-        unauthorized_withdrawal: {
-            id: "103",
-            account: "corp_treasury",
-            level: "critical",
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            event: "High-value outbound wire transfer request of $250,000 triggered step-up MFA anomaly policy"
-        },
-        rate_limit: {
-            id: "104",
-            account: "partner_api_v2",
+        change_password: {
+            id: "03",
+            account: "imani",
             level: "medium",
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            event: "Threshold exceeded: 12,000 requests/min from API client key ending in ...8F2A"
+            event: "Account password has not been updated in a long time and is recommended to update as soon as possible!"
         },
-        db_storage: {
-            id: "105",
-            account: "db_cluster_prod",
+        ira_reminder: {
+            id: "04",
+            account: "imani",
             level: "low",
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            event: "Storage capacity threshold reached: Postgres Primary Volume /dev/nvme0n1 at 88% capacity"
+            event: "Friendly reminder to contribute to your Roth IRA"
+        },
+        new_card: {
+            id: "105",
+            account: "imani",
+            level: "low",
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            event: "Opened new credit card account"
         },
         brute_force: {
             id: "106",

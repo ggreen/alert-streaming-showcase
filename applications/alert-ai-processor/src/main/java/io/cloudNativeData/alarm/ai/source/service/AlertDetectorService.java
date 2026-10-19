@@ -1,6 +1,6 @@
 package io.cloudNativeData.alarm.ai.source.service;
 
-import io.cloudNativeData.alarm.ai.source.domains.AiProcessSummary;
+import io.cloudNativeData.alarm.ai.source.domains.ProcessSummary;
 import showcase.streaming.domains.Activity;
 import showcase.streaming.domains.Alert;
 
@@ -20,5 +20,5 @@ public interface AlertDetectorService {
 
     List<Alert> checkForAlerts();
 
-    AiProcessSummary summarize();
+    ProcessSummary summarize();
 }

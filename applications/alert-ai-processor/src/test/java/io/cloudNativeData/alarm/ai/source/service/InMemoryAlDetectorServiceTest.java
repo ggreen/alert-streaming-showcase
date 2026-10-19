@@ -52,6 +52,25 @@ class InMemoryAlDetectorServiceTest {
     }
 
     @Test
+    void given_hasDetected_Alert_increaseAlertCount() {
+
+        List<Alert> expected = List.of(alert,alert);
+        var activities = List.of(activity,activity);
+
+        when(activityRepository.findAll())
+                .thenReturn(activities);
+        when(alertsModelinference.determineAlert(activities)).thenReturn(expected);
+
+        var before = subject.summarize();
+
+        subject.detectAlerts(activity);
+
+        var after = subject.summarize();
+
+        assertThat(before.getAlertCount()).isEqualTo(expected.size());
+    }
+
+    @Test
     void givenHashMoreThanMin_when_detectAlerts_Then_Call() {
 
         subject = new InMemoryAlDetectorService(activityRepository, alertsModelinference,1,delayMs);

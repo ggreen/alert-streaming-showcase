@@ -1,6 +1,6 @@
 package io.cloudNativeData.alarm.ai.source.service;
 
-import io.cloudNativeData.alarm.ai.source.domains.AiProcessSummary;
+import io.cloudNativeData.alarm.ai.source.domains.ProcessSummary;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import nyla.solutions.core.patterns.repository.memory.ListRepository;
@@ -28,7 +28,7 @@ public class InMemoryAlDetectorService implements AlertDetectorService{
     private final int batchCount;
     private final long delayMs;
     private Long lastCheckTime = null;
-    private final AiProcessSummary summary = new AiProcessSummary();
+    private final ProcessSummary summary = new ProcessSummary();
 
     public InMemoryAlDetectorService(ListRepository<Activity> activityRepository,
                                      AlertsModelInference modelInference,
@@ -59,7 +59,14 @@ public class InMemoryAlDetectorService implements AlertDetectorService{
 
         log.info("Detecting alerts for activity: {}",activity);
 
-        return checkForAlerts();
+        var detectedAlerts = checkForAlerts();
+
+        if(detectedAlerts != null && !detectedAlerts.isEmpty()){
+            summary.setAlertCount(summary.getAlertCount()+detectedAlerts.size());
+        }
+
+        log.info("summary: {}",summary);
+        return detectedAlerts;
     }
 
     @Override
@@ -84,7 +91,7 @@ public class InMemoryAlDetectorService implements AlertDetectorService{
     }
 
     @Override
-    public AiProcessSummary summarize() {
+    public ProcessSummary summarize() {
         return this.summary;
     }
 

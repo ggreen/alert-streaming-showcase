@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AiProcessSummary {
+public class ProcessSummary {
     private long activityCount;
+    private long alertCount;
 }

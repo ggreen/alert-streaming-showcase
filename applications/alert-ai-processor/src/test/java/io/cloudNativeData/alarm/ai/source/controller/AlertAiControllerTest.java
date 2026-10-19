@@ -1,6 +1,6 @@
 package io.cloudNativeData.alarm.ai.source.controller;
 
-import io.cloudNativeData.alarm.ai.source.domains.AiProcessSummary;
+import io.cloudNativeData.alarm.ai.source.domains.ProcessSummary;
 import io.cloudNativeData.alarm.ai.source.service.AlertDetectorService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ class AlertAiControllerTest {
     @Mock
     private AlertDetectorService service;
     @Mock
-    private AiProcessSummary expected;
+    private ProcessSummary expected;
 
     @BeforeEach
     void setUp() {

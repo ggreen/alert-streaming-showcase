@@ -6,7 +6,7 @@
 Start Ollama
 
 ```shell
-ollama serve
+./deployment/local/containers/start-ollama.sh
 ```
 
 

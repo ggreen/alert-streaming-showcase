@@ -66,7 +66,7 @@
             </div>
             <div>
                 <h1 class="font-bold text-lg leading-tight tracking-tight text-slate-900 dark:text-white">Source Activity Supplier</h1>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Post telemetry and audit events to local REST API</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Post telemetry and audit events to a REST API</p>
             </div>
         </div>
 
@@ -74,7 +74,7 @@
             <!-- Live Endpoint Quick Badge -->
             <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-600 dark:text-slate-300">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span id="headerEndpointBadge" class="truncate max-w-[220px]">http://localhost:6662/...</span>
+                <span id="headerEndpointBadge" class="truncate max-w-[220px]">http://hostname:6662/...</span>
             </div>
 
             <!-- Dark / Light Theme Toggle -->
@@ -90,8 +90,8 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-        <!-- LEFT COLUMN: Input Form & Controls (7 Cols) -->
-        <div class="lg:col-span-7 space-y-6">
+        <!-- LEFT COLUMN: Input Form & Controls (6 Cols) -->
+        <div class="lg:col-span-5 space-y-6">
 
             <!-- Target API Endpoint Settings Card -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm transition-all" style="display: none;">
@@ -256,15 +256,15 @@
         </div>
 
 
-        <!-- RIGHT COLUMN: Live Request Preview & Response Telemetry (5 Cols) -->
-        <div class="lg:col-span-5 space-y-6">
+        <!-- RIGHT COLUMN: Live Request Preview & Response Telemetry (7 Cols) -->
+        <div class="lg:col-span-7 space-y-6">
 
             <!-- Live Payload Preview Card -->
             <div class="bg-slate-900 text-slate-100 rounded-2xl p-5 border border-slate-800 shadow-lg space-y-4" style="display: none;">
                 <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <i class="fa-solid fa-code text-emerald-400"></i> Live Request Payload
-            </span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                      <i class="fa-solid fa-code text-emerald-400"></i> Live Request Payload
+                    </span>
                     <button type="button" id="copyPayloadBtn" class="text-xs text-slate-400 hover:text-white transition flex items-center gap-1 bg-slate-800 px-2.5 py-1 rounded-lg">
                         <i class="fa-regular fa-copy"></i> <span id="copyBtnText">Copy</span>
                     </button>
@@ -280,35 +280,40 @@
             </div>
 
 
-            <!-- Server Response Card -->
+            <!-- Server Response Card (Improved Telemetry Dashboard) -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
-                        <i class="fa-solid fa-satellite-dish text-indigo-500"></i> API Response Telemetry
-                    </h3>
-                    <span id="statusBadge" class="hidden text-xs px-2.5 py-1 rounded-full font-bold"></span>
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                            <i class="fa-solid fa-satellite-dish text-indigo-500"></i> API Response Telemetry
+                        </h3>
+                        <span id="telemetryCountBadge" class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-semibold">0 Events</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" id="clearTelemetryBtn" title="Clear Telemetry Logs" class="p-1.5 text-xs text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Empty State -->
-                <div id="responseEmptyState" class="py-10 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
-                    <i class="fa-solid fa-terminal text-2xl text-slate-300 dark:text-slate-700 mb-2"></i>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Ready to post. Response details will appear here.</p>
+                <div id="responseEmptyState" class="py-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                    <i class="fa-solid fa-terminal text-3xl text-slate-300 dark:text-slate-700 mb-2"></i>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">No telemetry events logged yet.</p>
+                    <p class="text-[11px] text-slate-400 dark:text-slate-600 mt-1">Post an activity or click "Simulate Fraud" to stream results live.</p>
                 </div>
 
-                <!-- Response Details Box (Hidden initially) -->
-                <div id="responseContent" class="hidden space-y-3">
+                <!-- CORS / Network Error Hint -->
+                <div id="corsHint" class="hidden p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400 text-xs flex items-start gap-2">
+                    <i class="fa-solid fa-triangle-exclamation mt-0.5 shrink-0"></i>
                     <div>
-                        <span class="text-[11px] text-slate-400 font-mono block mb-1">Response Body:</span>
-                        <pre id="responseBody" class="font-mono text-xs bg-slate-950 text-slate-200 p-4 rounded-xl overflow-x-auto max-h-52 border border-slate-800 leading-relaxed"></pre>
-                    </div>
-
-                    <div id="corsHint" class="hidden p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400 text-xs flex items-start gap-2">
-                        <i class="fa-solid fa-triangle-exclamation mt-0.5 shrink-0"></i>
-                        <div>
-                            <strong>CORS / Connection Issue?</strong> Ensure your backend is running at <span class="font-mono underline text-xs break-all" id="corsUrlHint"></span> and returning CORS header <code>Access-Control-Allow-Origin: *</code>.
-                        </div>
+                        <strong>Connection Error?</strong> Ensure backend service is reachable at <span class="font-mono underline text-xs break-all" id="corsUrlHint"></span> with CORS header <code>Access-Control-Allow-Origin: *</code> enabled.
                     </div>
                 </div>
+
+                <!-- Activity Telemetry Feed Container -->
+                <div id="telemetryList" class="space-y-3 max-h-[560px] overflow-y-auto pr-1"></div>
             </div>
 
         </div>
@@ -385,6 +390,9 @@
         }
     };
 
+    // State Management for Telemetry Logs
+    let telemetryLogs = [];
+
     // DOM Element References
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     const themeIcon = document.getElementById('themeIcon');
@@ -417,9 +425,9 @@
     const simulateFraudText = document.getElementById('simulateFraudText');
 
     const responseEmptyState = document.getElementById('responseEmptyState');
-    const responseContent = document.getElementById('responseContent');
-    const statusBadge = document.getElementById('statusBadge');
-    const responseBody = document.getElementById('responseBody');
+    const telemetryList = document.getElementById('telemetryList');
+    const telemetryCountBadge = document.getElementById('telemetryCountBadge');
+    const clearTelemetryBtn = document.getElementById('clearTelemetryBtn');
     const corsHint = document.getElementById('corsHint');
     const corsUrlHint = document.getElementById('corsUrlHint');
     const toastContainer = document.getElementById('toastContainer');
@@ -534,7 +542,6 @@
     copyPayloadBtn.addEventListener('click', () => {
         const payloadStr = JSON.stringify(getPayloadObject(), null, 2);
 
-        // Clipboard Copy Fallback
         if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard.writeText(payloadStr);
         } else {
@@ -554,54 +561,139 @@
     // --- Helper function to send single POST payload ---
     async function postSingleActivity(payload) {
         const targetUrl = endpointUrlInput.value;
-        const response = await fetch(targetUrl, {
-            method: 'POST',
-            headers: {
-                'accept': '*/*',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
+        let response = null;
+        let rawText = '';
+        let isError = false;
+        let statusMessage = '';
 
-        const rawText = await response.text();
-        let formattedText = rawText;
         try {
-            const parsed = JSON.parse(rawText);
-            formattedText = JSON.stringify(parsed, null, 2);
-        } catch (_) {}
+            response = await fetch(targetUrl, {
+                method: 'POST',
+                headers: {
+                    'accept': '*/*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
 
-        return { response, rawText: formattedText, targetUrl };
-    }
+            rawText = await response.text();
+            try {
+                const parsed = JSON.parse(rawText);
+                rawText = JSON.stringify(parsed, null, 2);
+            } catch (_) {}
 
-    // Render Response UI
-    function renderTelemetryResponse(response, rawText, targetUrl) {
-        responseEmptyState.classList.add('hidden');
-        responseContent.classList.remove('hidden');
-        corsHint.classList.add('hidden');
-        statusBadge.classList.remove('hidden');
+            statusMessage = response.ok
+                ? `HTTP ${response.status} ${response.statusText || 'OK'}`
+                : `HTTP ${response.status}`;
+            isError = !response.ok;
 
-        if (response.ok) {
-            statusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800';
-            statusBadge.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> ${response.status} ${response.statusText || 'OK'}`;
-            responseBody.textContent = rawText || '(Empty 200 OK Response)';
-        } else {
-            statusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-bold bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800';
-            statusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> HTTP ${response.status}`;
-            responseBody.textContent = rawText || `Error ${response.status}: ${response.statusText}`;
+        } catch (err) {
+            isError = true;
+            statusMessage = `Connection Failed (${err.message})`;
+            rawText = `Fetch Error: ${err.message}`;
+            corsUrlHint.textContent = targetUrl;
+            corsHint.classList.remove('hidden');
         }
+
+        const logEntry = {
+            id: payload.id || 'N/A',
+            account: payload.account || 'Unknown',
+            icon: payload.icon || 'fa-bolt',
+            time: payload.time || getFormattedTime(),
+            activity: payload.activity || '',
+            status: statusMessage,
+            isError: isError,
+            rawResponse: rawText,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        };
+
+        addTelemetryLog(logEntry);
+        return { isError, response, statusMessage };
     }
 
-    function renderTelemetryError(err, targetUrl) {
+    // Add and Render Telemetry Log Entry
+    function addTelemetryLog(entry) {
+        telemetryLogs.unshift(entry);
+        renderTelemetryLogs();
+    }
+
+    // Render Telemetry List HTML
+    function renderTelemetryLogs() {
+        if (telemetryLogs.length === 0) {
+            responseEmptyState.classList.remove('hidden');
+            telemetryList.innerHTML = '';
+            telemetryCountBadge.textContent = '0 Events';
+            return;
+        }
+
         responseEmptyState.classList.add('hidden');
-        responseContent.classList.remove('hidden');
-        statusBadge.classList.remove('hidden');
+        telemetryCountBadge.textContent = `${telemetryLogs.length} Event${telemetryLogs.length > 1 ? 's' : ''}`;
 
-        statusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-bold bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800';
-        statusBadge.innerHTML = `<i class="fa-solid fa-plug-circle-xmark mr-1"></i> Connection Failed`;
+        telemetryList.innerHTML = telemetryLogs.map((item, idx) => {
+            const statusClass = item.isError
+                ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-800'
+                : 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800';
 
-        responseBody.textContent = `Fetch Error: ${err.message}`;
-        corsUrlHint.textContent = targetUrl;
-        corsHint.classList.remove('hidden');
+            const statusIcon = item.isError ? 'fa-triangle-exclamation' : 'fa-circle-check';
+
+            return `
+                <div class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/90 rounded-xl p-3.5 space-y-2.5 transition-all hover:border-slate-300 dark:hover:border-slate-700">
+                    <!-- Top Row: Icon, ID, Account & Status Badge -->
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <!-- Activity Icon Badge -->
+                            <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-950/80 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm shrink-0">
+                                <i class="fa-solid ${escapeHtml(item.icon)}"></i>
+                            </div>
+
+                            <div class="truncate">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono text-xs font-bold text-blue-600 dark:text-blue-400">#${escapeHtml(item.id)}</span>
+                                    <span class="font-semibold text-xs text-slate-800 dark:text-slate-200 truncate">${escapeHtml(item.account)}</span>
+                                </div>
+                                <span class="text-[10px] text-slate-400 font-mono">${escapeHtml(item.time)} • Logged ${escapeHtml(item.timestamp)}</span>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full font-bold border shrink-0 ${statusClass}">
+                            <i class="fa-solid ${statusIcon} mr-1"></i> ${escapeHtml(item.status)}
+                        </span>
+                    </div>
+
+                    <!-- Activity Description -->
+                    <div class="text-xs text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900/60 p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-800/60 leading-relaxed font-sans">
+                        ${escapeHtml(item.activity)}
+                    </div>
+
+                    <!-- Toggle Collapsible Raw Response -->
+                    <details class="group text-[11px]">
+                        <summary class="cursor-pointer text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 font-mono flex items-center gap-1 select-none">
+                            <i class="fa-solid fa-chevron-right group-open:rotate-90 transition-transform duration-150 text-[10px]"></i>
+                            <span>View Raw API Response</span>
+                        </summary>
+                        <pre class="mt-2 font-mono text-[11px] bg-slate-900 text-slate-200 p-3 rounded-lg overflow-x-auto max-h-40 border border-slate-800 leading-relaxed">${escapeHtml(item.rawResponse)}</pre>
+                    </details>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Clear Telemetry Logs
+    clearTelemetryBtn.addEventListener('click', () => {
+        telemetryLogs = [];
+        corsHint.classList.add('hidden');
+        renderTelemetryLogs();
+        showToast("Telemetry logs cleared", "info");
+    });
+
+    // Utility: HTML Escaper
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
     }
 
     // --- 8. Form Submission via Fetch ---
@@ -610,7 +702,6 @@
 
         const payload = getPayloadObject();
 
-        // Set Loading UI State
         submitBtn.disabled = true;
         simulateFraudBtn.disabled = true;
         submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
@@ -618,19 +709,15 @@
         submitText.textContent = 'Posting Event...';
 
         try {
-            const { response, rawText, targetUrl } = await postSingleActivity(payload);
-            renderTelemetryResponse(response, rawText, targetUrl);
-
-            if (response.ok) {
+            const { isError, statusMessage } = await postSingleActivity(payload);
+            if (!isError) {
                 showToast("Activity successfully posted!", "success");
             } else {
-                showToast(`Server returned status ${response.status}`, "error");
+                showToast(`Post failed: ${statusMessage}`, "error");
             }
         } catch (err) {
-            renderTelemetryError(err, endpointUrlInput.value);
             showToast("Request failed. Check local server connection.", "error");
         } finally {
-            // Restore Buttons State
             submitBtn.disabled = false;
             simulateFraudBtn.disabled = false;
             submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
@@ -650,33 +737,19 @@
         showToast(`Starting fraud simulation (${FRAUD_ACTIVITIES.length} events)...`, "info");
 
         let successCount = 0;
-        let logs = [];
 
         for (let i = 0; i < FRAUD_ACTIVITIES.length; i++) {
             const fraudPayload = FRAUD_ACTIVITIES[i];
-            try {
-                const { response, rawText } = await postSingleActivity(fraudPayload);
+            const { isError } = await postSingleActivity(fraudPayload);
 
-                if (response.ok) {
-                    successCount++;
-                    logs.push(`[${i+1}/${FRAUD_ACTIVITIES.length}] ID ${fraudPayload.id}: SUCCESS (${response.status})`);
-                } else {
-                    logs.push(`[${i+1}/${FRAUD_ACTIVITIES.length}] ID ${fraudPayload.id}: FAILED (HTTP ${response.status})`);
-                }
+            if (!isError) successCount++;
 
-                renderTelemetryResponse(response, `Batch Output Log:\n` + logs.join('\n') + `\n\nLatest Raw Response:\n${rawText}`, endpointUrlInput.value);
-            } catch (err) {
-                logs.push(`[${i+1}/${FRAUD_ACTIVITIES.length}] ID ${fraudPayload.id}: FETCH ERROR (${err.message})`);
-                renderTelemetryError(err, endpointUrlInput.value);
-                responseBody.textContent = `Batch Output Log:\n` + logs.join('\n') + `\n\n${responseBody.textContent}`;
-            }
-
-            // Short pause between sequential POSTs for visual telemetry tracking
-            await new Promise(resolve => setTimeout(resolve, 300));
+            // Pause between POSTs for visual telemetry stream
+            await new Promise(resolve => setTimeout(resolve, 350));
         }
 
         if (successCount === FRAUD_ACTIVITIES.length) {
-            showToast(`Fraud simulation complete! All ${FRAUD_ACTIVITIES.length} events posted.`, "success");
+            showToast(`Fraud simulation complete! All ${FRAUD_ACTIVITIES.length} events logged.`, "success");
         } else {
             showToast(`Fraud simulation finished: ${successCount}/${FRAUD_ACTIVITIES.length} succeeded.`, "error");
         }
@@ -706,12 +779,10 @@
 
         toastContainer.appendChild(toast);
 
-        // Animate In
         requestAnimationFrame(() => {
             toast.classList.remove('translate-y-2', 'opacity-0');
         });
 
-        // Dismiss after 3s
         setTimeout(() => {
             toast.classList.add('opacity-0', 'translate-y-2');
             setTimeout(() => toast.remove(), 300);

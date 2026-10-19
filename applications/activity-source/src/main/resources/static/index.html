@@ -1,6 +1,635 @@
-<h1>HTTP Source</h1>
-<hr/>
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Activity Poster Studio</title>
 
-<ul>
-    <li><a href="/swagger-ui.html">Swagger-UI</a></li>
-</ul>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome 6.5.1 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f6ff',
+                            100: '#e0edff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar for sleek dark code views */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans min-h-screen transition-colors duration-300 flex flex-col">
+
+<!-- Top Navigation Header -->
+<header class="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-bolt text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg leading-tight tracking-tight text-slate-900 dark:text-white">Activity Dispatch Studio</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Post telemetry and audit events to local REST API</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <!-- Live Endpoint Quick Badge -->
+            <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-600 dark:text-slate-300">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="headerEndpointBadge" class="truncate max-w-[220px]">http://localhost:6662/...</span>
+            </div>
+
+            <!-- Dark / Light Theme Toggle -->
+            <button id="themeToggleBtn" type="button" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500" title="Toggle Theme">
+                <i id="themeIcon" class="fa-solid fa-moon text-base"></i>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Main Container -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- LEFT COLUMN: Input Form & Controls (7 Cols) -->
+        <div class="lg:col-span-7 space-y-6">
+
+            <!-- Target API Endpoint Settings Card -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm transition-all">
+                <div class="flex items-center justify-between mb-3">
+                    <label for="endpointUrl" class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                        <i class="fa-solid fa-server text-blue-500"></i> Target Endpoint URL
+                    </label>
+                    <button type="button" id="resetEndpointBtn" class="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-rotate-left"></i> Reset Default
+                    </button>
+                </div>
+                <div class="relative flex items-center">
+                    <input type="url" id="endpointUrl" value="http://localhost:6662/activities/activity" required
+                           class="w-full pl-3.5 pr-24 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" />
+                    <span class="absolute right-3 text-xs font-semibold px-2 py-1 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded-lg">POST</span>
+                </div>
+            </div>
+
+            <!-- Main Form Box -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
+
+                <!-- Preset Selector Header -->
+                <div class="p-4 bg-gradient-to-br from-blue-50 to-indigo-50/50 dark:from-slate-800/80 dark:to-indigo-950/30 rounded-xl border border-blue-100 dark:border-slate-700/80 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label for="presetSelect" class="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-amber-500 dark:text-amber-400"></i> Quick Preset Selector
+                        </label>
+                        <span class="text-xs text-slate-500 dark:text-slate-400">Pre-populates fields</span>
+                    </div>
+                    <select id="presetSelect" class="w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition shadow-sm">
+                        <option value="custom">-- Custom / Manual Entry --</option>
+                        <option value="wire_transfer" selected>Wire Transfer Above Threshold</option>
+                        <option value="large_withdrawal">Large Cash Withdrawal</option>
+                        <option value="password_changed">Password Changed / Security Alert</option>
+                        <option value="new_device">New Device Login</option>
+                        <option value="failed_logins">Failed Login Attempts</option>
+                        <option value="account_updated">Account Details Updated</option>
+                        <option value="suspicious_ip">Suspicious IP Activity Detected</option>
+                        <option value="card_freeze">Card Freeze Request</option>
+                    </select>
+                </div>
+
+                <form id="activityForm" class="space-y-5">
+
+                    <!-- ID & Account Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- ID Field with auto-increment / generate -->
+                        <div>
+                            <label for="idInput" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                                Activity ID
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="text" id="idInput" value="01" required
+                                       class="flex-1 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none transition" />
+                                <button type="button" id="nextIdBtn" title="Increment ID (+1)" class="px-3 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition flex items-center gap-1 shrink-0">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                                <button type="button" id="randomIdBtn" title="Generate Random ID" class="px-3 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition flex items-center gap-1 shrink-0">
+                                    <i class="fa-solid fa-shuffle"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Account Field -->
+                        <div>
+                            <label for="accountInput" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                                Account Name
+                            </label>
+                            <input type="text" id="accountInput" value="gene" required
+                                   class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none transition" />
+                        </div>
+                    </div>
+
+                    <!-- Icon Selector with Categorized Dropdown and Live Icon Preview -->
+                    <div>
+                        <label for="iconSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                            Icon Class (FontAwesome)
+                        </label>
+                        <div class="flex items-center gap-3">
+                            <!-- Preview Tile -->
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 text-xl flex items-center justify-center shrink-0 shadow-sm transition-transform duration-200 hover:scale-105">
+                                <i id="previewIcon" class="fa-solid fa-hand-holding-dollar"></i>
+                            </div>
+
+                            <!-- Categorized Dropdown -->
+                            <select id="iconSelect" required class="flex-1 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none transition cursor-pointer">
+                                <optgroup label="Finance & Banking">
+                                    <option value="fa-hand-holding-dollar" selected>fa-hand-holding-dollar</option>
+                                    <option value="fa-credit-card">fa-credit-card</option>
+                                    <option value="fa-money-bill-transfer">fa-money-bill-transfer</option>
+                                    <option value="fa-building-columns">fa-building-columns (Bank)</option>
+                                    <option value="fa-wallet">fa-wallet</option>
+                                    <option value="fa-piggy-bank">fa-piggy-bank</option>
+                                    <option value="fa-snowflake">fa-snowflake (Freeze)</option>
+                                </optgroup>
+                                <optgroup label="Security & Auth">
+                                    <option value="fa-key">fa-key</option>
+                                    <option value="fa-lock">fa-lock</option>
+                                    <option value="fa-shield-halved">fa-shield-halved</option>
+                                    <option value="fa-user-shield">fa-user-shield</option>
+                                    <option value="fa-laptop">fa-laptop (Device)</option>
+                                    <option value="fa-right-to-bracket">fa-right-to-bracket</option>
+                                </optgroup>
+                                <optgroup label="User & Account">
+                                    <option value="fa-user">fa-user</option>
+                                    <option value="fa-user-check">fa-user-check</option>
+                                    <option value="fa-user-pen">fa-user-pen</option>
+                                    <option value="fa-id-card">fa-id-card</option>
+                                </optgroup>
+                                <optgroup label="System & Alerts">
+                                    <option value="fa-triangle-exclamation">fa-triangle-exclamation</option>
+                                    <option value="fa-circle-xmark">fa-circle-xmark</option>
+                                    <option value="fa-circle-check">fa-circle-check</option>
+                                    <option value="fa-ban">fa-ban</option>
+                                    <option value="fa-bell">fa-bell</option>
+                                    <option value="fa-network-wired">fa-network-wired</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Time Input with Auto-Now Button -->
+                    <div>
+                        <label for="timeInput" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                            Time Stamp
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="text" id="timeInput" value="06:33 PM" required
+                                   class="flex-1 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none transition" />
+                            <button type="button" id="setCurrentTimeBtn" class="px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition flex items-center gap-1.5 shrink-0">
+                                <i class="fa-regular fa-clock text-blue-500"></i> Set Now
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Activity Description Field -->
+                    <div>
+                        <label for="activityInput" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                            Activity Description
+                        </label>
+                        <textarea id="activityInput" rows="3" required
+                                  class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none transition">Wire transfer of amount above threshold</textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="submitBtn" class="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 active:scale-[0.99] transition duration-200 flex items-center justify-center gap-2">
+                        <i id="submitIcon" class="fa-solid fa-paper-plane"></i>
+                        <span id="submitText">Post Activity Event</span>
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+
+
+        <!-- RIGHT COLUMN: Live Request Preview & Response Telemetry (5 Cols) -->
+        <div class="lg:col-span-5 space-y-6">
+
+            <!-- Live Payload Preview Card -->
+            <div class="bg-slate-900 text-slate-100 rounded-2xl p-5 border border-slate-800 shadow-lg space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+              <i class="fa-solid fa-code text-emerald-400"></i> Live Request Payload
+            </span>
+                    <button type="button" id="copyPayloadBtn" class="text-xs text-slate-400 hover:text-white transition flex items-center gap-1 bg-slate-800 px-2.5 py-1 rounded-lg">
+                        <i class="fa-regular fa-copy"></i> <span id="copyBtnText">Copy</span>
+                    </button>
+                </div>
+
+                <!-- Code Block with JetBrains Mono -->
+                <pre id="jsonPreview" class="font-mono text-xs text-emerald-400 leading-relaxed overflow-x-auto bg-slate-950/80 p-4 rounded-xl border border-slate-800/80 select-all"></pre>
+
+                <div class="text-[11px] text-slate-500 flex items-center gap-2 font-mono">
+                    <i class="fa-solid fa-circle-info text-blue-400"></i>
+                    <span>Sends JSON body with <code>Content-Type: application/json</code></span>
+                </div>
+            </div>
+
+
+            <!-- Server Response Card -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                        <i class="fa-solid fa-satellite-dish text-indigo-500"></i> API Response Telemetry
+                    </h3>
+                    <span id="statusBadge" class="hidden text-xs px-2.5 py-1 rounded-full font-bold"></span>
+                </div>
+
+                <!-- Empty State -->
+                <div id="responseEmptyState" class="py-10 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                    <i class="fa-solid fa-terminal text-2xl text-slate-300 dark:text-slate-700 mb-2"></i>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Ready to post. Response details will appear here.</p>
+                </div>
+
+                <!-- Response Details Box (Hidden initially) -->
+                <div id="responseContent" class="hidden space-y-3">
+                    <div>
+                        <span class="text-[11px] text-slate-400 font-mono block mb-1">Response Body:</span>
+                        <pre id="responseBody" class="font-mono text-xs bg-slate-950 text-slate-200 p-4 rounded-xl overflow-x-auto max-h-52 border border-slate-800 leading-relaxed"></pre>
+                    </div>
+
+                    <div id="corsHint" class="hidden p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400 text-xs flex items-start gap-2">
+                        <i class="fa-solid fa-triangle-exclamation mt-0.5 shrink-0"></i>
+                        <div>
+                            <strong>CORS / Connection Issue?</strong> Ensure your backend is running at <span class="font-mono underline text-xs break-all" id="corsUrlHint"></span> and returning CORS header <code>Access-Control-Allow-Origin: *</code>.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<!-- Notification Toast Container -->
+<div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+<!-- JavaScript App Logic -->
+<script>
+    // Preset Data Store
+    const PRESETS = {
+        wire_transfer: {
+            id: "01",
+            account: "gene",
+            icon: "fa-hand-holding-dollar",
+            activity: "Wire transfer of amount above threshold"
+        },
+        large_withdrawal: {
+            id: "02",
+            account: "sarah_m",
+            icon: "fa-money-bill-transfer",
+            activity: "Large cash withdrawal of $10,000 at ATM #883"
+        },
+        password_changed: {
+            id: "03",
+            account: "admin_user",
+            icon: "fa-key",
+            activity: "Account security password successfully updated"
+        },
+        new_device: {
+            id: "04",
+            account: "gene",
+            icon: "fa-laptop",
+            activity: "New device login detected from MacOS (Chrome v122)"
+        },
+        failed_logins: {
+            id: "05",
+            account: "dev_sec",
+            icon: "fa-ban",
+            activity: "Multiple (5) failed login attempts detected within 2 mins"
+        },
+        account_updated: {
+            id: "06",
+            account: "john_doe",
+            icon: "fa-user-pen",
+            activity: "Primary account email and notification settings modified"
+        },
+        suspicious_ip: {
+            id: "07",
+            account: "gene",
+            icon: "fa-triangle-exclamation",
+            activity: "Suspicious API access attempt from non-whitelisted IP (192.168.1.100)"
+        },
+        card_freeze: {
+            id: "08",
+            account: "alex_k",
+            icon: "fa-snowflake",
+            activity: "Debit card temporary freeze initiated by user"
+        }
+    };
+
+    // DOM Element References
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const endpointUrlInput = document.getElementById('endpointUrl');
+    const headerEndpointBadge = document.getElementById('headerEndpointBadge');
+    const resetEndpointBtn = document.getElementById('resetEndpointBtn');
+
+    const presetSelect = document.getElementById('presetSelect');
+    const idInput = document.getElementById('idInput');
+    const nextIdBtn = document.getElementById('nextIdBtn');
+    const randomIdBtn = document.getElementById('randomIdBtn');
+    const accountInput = document.getElementById('accountInput');
+    const iconSelect = document.getElementById('iconSelect');
+    const previewIcon = document.getElementById('previewIcon');
+    const timeInput = document.getElementById('timeInput');
+    const setCurrentTimeBtn = document.getElementById('setCurrentTimeBtn');
+    const activityInput = document.getElementById('activityInput');
+
+    const jsonPreview = document.getElementById('jsonPreview');
+    const copyPayloadBtn = document.getElementById('copyPayloadBtn');
+    const copyBtnText = document.getElementById('copyBtnText');
+
+    const activityForm = document.getElementById('activityForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitIcon = document.getElementById('submitIcon');
+    const submitText = document.getElementById('submitText');
+
+    const responseEmptyState = document.getElementById('responseEmptyState');
+    const responseContent = document.getElementById('responseContent');
+    const statusBadge = document.getElementById('statusBadge');
+    const responseBody = document.getElementById('responseBody');
+    const corsHint = document.getElementById('corsHint');
+    const corsUrlHint = document.getElementById('corsUrlHint');
+    const toastContainer = document.getElementById('toastContainer');
+
+    // --- 1. Theme Toggle Logic ---
+    themeToggleBtn.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        themeIcon.className = isDark ? 'fa-solid fa-moon text-base' : 'fa-solid fa-sun text-amber-500 text-base';
+    });
+
+    // --- 2. Time Helper (hh:mm A) ---
+    function getFormattedTime() {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        return `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+    }
+
+    setCurrentTimeBtn.addEventListener('click', () => {
+        timeInput.value = getFormattedTime();
+        updateLivePreview();
+        showToast("Time updated to current system time", "info");
+    });
+
+    // --- 3. Endpoint Sync ---
+    function updateEndpointBadge() {
+        headerEndpointBadge.textContent = endpointUrlInput.value || 'No Endpoint Set';
+    }
+    endpointUrlInput.addEventListener('input', updateEndpointBadge);
+    resetEndpointBtn.addEventListener('click', () => {
+        endpointUrlInput.value = 'http://localhost:6662/activities/activity';
+        updateEndpointBadge();
+        showToast("Endpoint URL reset to default", "info");
+    });
+    updateEndpointBadge();
+
+    // --- 4. ID Incrementor & Randomizer ---
+    nextIdBtn.addEventListener('click', () => {
+        const current = parseInt(idInput.value, 10);
+        if (!isNaN(current)) {
+            idInput.value = (current + 1).toString().padStart(2, '0');
+        } else {
+            idInput.value = "01";
+        }
+        presetSelect.value = "custom";
+        updateLivePreview();
+    });
+
+    randomIdBtn.addEventListener('click', () => {
+        const randomVal = Math.floor(Math.random() * 90 + 10).toString();
+        idInput.value = randomVal;
+        presetSelect.value = "custom";
+        updateLivePreview();
+    });
+
+    // --- 5. Icon Picker & Preview Sync ---
+    function updateIconTile() {
+        previewIcon.className = `fa-solid ${iconSelect.value}`;
+    }
+    iconSelect.addEventListener('change', () => {
+        updateIconTile();
+        presetSelect.value = "custom";
+        updateLivePreview();
+    });
+
+    // --- 6. Preset Selector Handler ---
+    presetSelect.addEventListener('change', (e) => {
+        const key = e.target.value;
+        if (PRESETS[key]) {
+            const p = PRESETS[key];
+            idInput.value = p.id;
+            accountInput.value = p.account;
+            iconSelect.value = p.icon;
+            activityInput.value = p.activity;
+            timeInput.value = getFormattedTime();
+
+            updateIconTile();
+            updateLivePreview();
+            showToast(`Loaded preset: ${e.target.options[e.target.selectedIndex].text}`, "success");
+        }
+    });
+
+    // Reset preset to 'custom' when user manually edits fields
+    [idInput, accountInput, timeInput, activityInput].forEach(el => {
+        el.addEventListener('input', () => {
+            presetSelect.value = "custom";
+            updateLivePreview();
+        });
+    });
+
+    // --- 7. Live JSON Payload Preview Generator ---
+    function getPayloadObject() {
+        return {
+            id: idInput.value,
+            account: accountInput.value,
+            icon: iconSelect.value,
+            time: timeInput.value,
+            activity: activityInput.value
+        };
+    }
+
+    function updateLivePreview() {
+        const payload = getPayloadObject();
+        jsonPreview.textContent = JSON.stringify(payload, null, 2);
+    }
+    updateLivePreview();
+
+    // Copy Payload Button
+    copyPayloadBtn.addEventListener('click', () => {
+        const payloadStr = JSON.stringify(getPayloadObject(), null, 2);
+
+        // Clipboard Copy Fallback
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(payloadStr);
+        } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = payloadStr;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+        }
+
+        copyBtnText.textContent = "Copied!";
+        setTimeout(() => { copyBtnText.textContent = "Copy"; }, 2000);
+        showToast("JSON Payload copied to clipboard", "info");
+    });
+
+    // --- 8. Form Submission via Fetch ---
+    activityForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const targetUrl = endpointUrlInput.value;
+        const payload = getPayloadObject();
+
+        // Set Loading UI State
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        submitIcon.className = 'fa-solid fa-spinner fa-spin';
+        submitText.textContent = 'Posting Event...';
+
+        try {
+            const response = await fetch(targetUrl, {
+                method: 'POST',
+                headers: {
+                    'accept': '*/*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const rawText = await response.text();
+            let formattedText = rawText;
+            try {
+                const parsed = JSON.parse(rawText);
+                formattedText = JSON.stringify(parsed, null, 2);
+            } catch (_) {
+                // Keep as plain text if not JSON
+            }
+
+            // Render Telemetry
+            responseEmptyState.classList.add('hidden');
+            responseContent.classList.remove('hidden');
+            corsHint.classList.add('hidden');
+
+            statusBadge.classList.remove('hidden');
+            if (response.ok) {
+                statusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800';
+                statusBadge.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> ${response.status} ${response.statusText || 'OK'}`;
+                responseBody.textContent = formattedText || '(Empty 200 OK Response)';
+                showToast("Activity successfully posted!", "success");
+            } else {
+                statusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-bold bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800';
+                statusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> HTTP ${response.status}`;
+                responseBody.textContent = formattedText || `Error ${response.status}: ${response.statusText}`;
+                showToast(`Server returned status ${response.status}`, "error");
+            }
+
+        } catch (err) {
+            // Network / CORS Failure
+            responseEmptyState.classList.add('hidden');
+            responseContent.classList.remove('hidden');
+
+            statusBadge.classList.remove('hidden');
+            statusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-bold bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800';
+            statusBadge.innerHTML = `<i class="fa-solid fa-plug-circle-xmark mr-1"></i> Connection Failed`;
+
+            responseBody.textContent = `Fetch Error: ${err.message}`;
+            corsUrlHint.textContent = targetUrl;
+            corsHint.classList.remove('hidden');
+
+            showToast("Request failed. Check local server connection.", "error");
+        } finally {
+            // Restore Submit Button State
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            submitIcon.className = 'fa-solid fa-paper-plane';
+            submitText.textContent = 'Post Activity Event';
+        }
+    });
+
+    // --- 9. Toast Notification System ---
+    function showToast(message, type = "info") {
+        const toast = document.createElement('div');
+        toast.className = `pointer-events-auto flex items-center gap-3 p-3.5 rounded-xl shadow-xl text-xs font-semibold border transition-all duration-300 transform translate-y-2 opacity-0`;
+
+        if (type === 'success') {
+            toast.classList.add('bg-slate-900', 'text-emerald-400', 'border-emerald-500/30');
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i> <span>${message}</span>`;
+        } else if (type === 'error') {
+            toast.classList.add('bg-slate-900', 'text-rose-400', 'border-rose-500/30');
+            toast.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-400 text-sm"></i> <span>${message}</span>`;
+        } else {
+            toast.classList.add('bg-slate-900', 'text-blue-400', 'border-blue-500/30');
+            toast.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400 text-sm"></i> <span>${message}</span>`;
+        }
+
+        toastContainer.appendChild(toast);
+
+        // Animate In
+        requestAnimationFrame(() => {
+            toast.classList.remove('translate-y-2', 'opacity-0');
+        });
+
+        // Dismiss after 3s
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'translate-y-2');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+</script>
+</body>
+</html>

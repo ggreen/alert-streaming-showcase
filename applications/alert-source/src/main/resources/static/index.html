@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SOC Alert Dispatcher & API Tester</title>
+    <title>Alert Dispatcher & API Tester</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons CDN -->
@@ -68,7 +68,7 @@
             </div>
             <div>
                 <h1 class="text-lg font-bold text-white tracking-wide flex items-center gap-2">
-                    SOC Alert Dispatcher
+                    Alert Dispatcher
                     <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-950 border border-cyan-800 text-cyan-400 font-mono">v1.2</span>
                 </h1>
                 <p class="text-xs text-slate-400">Security Incident Response & API Payload Tester</p>
@@ -211,8 +211,6 @@
                             <div class="flex gap-2">
                                 <select id="httpMethod" class="bg-slate-900 border border-slate-700 text-xs text-cyan-400 font-mono font-bold rounded-lg px-2.5 py-1.5 focus:outline-none">
                                     <option value="POST">POST</option>
-                                    <option value="PUT">PUT</option>
-                                    <option value="PATCH">PATCH</option>
                                 </select>
                                 <input type="text" id="targetUrl" value="/alerts/alert" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-500 transition" />
                             </div>
@@ -353,7 +351,7 @@
             <ul class="list-disc pl-4 space-y-1 text-slate-400">
                 <li><strong class="text-slate-200">cURL Mirroring:</strong> Generates formatted cURL identical to your server execution string.</li>
                 <li><strong class="text-slate-200">Severity Badges:</strong> Standardized visual hierarchy (Low, Medium, High, Critical).</li>
-                <li><strong class="text-slate-200">Local Testing:</strong> If target server <code class="text-cyan-400 bg-slate-950 px-1 py-0.5 rounded">http://localhost:6661</code> is offline, direct standard CORS browser errors will be handled gracefully in the execution log.</li>
+                <li><strong class="text-slate-200">Local Testing:</strong> If target server <code class="text-cyan-400 bg-slate-950 px-1 py-0.5 rounded">http://HOSTNAME:6661</code> is offline, direct standard CORS browser errors will be handled gracefully in the execution log.</li>
             </ul>
         </div>
 
@@ -443,12 +441,12 @@
     });
 
     // Handle Severity Buttons Selection
-    severitySelector.addEventListener('click', (e) => {
+    severitySelector?.addEventListener('click', (e) => {
         const btn = e.target.closest('.severity-btn');
         if (!btn) return;
 
         const level = btn.getAttribute('data-level');
-        levelEl.value = level;
+        if (levelEl) levelEl.value = level;
 
         // Update UI button active states
         document.querySelectorAll('.severity-btn').forEach(b => {
@@ -468,20 +466,20 @@
 
     // Synchronize Input Changes with Dynamic Code Generators
     [alertIdEl, accountEl, alertTimeEl, eventDetailsEl, targetUrlEl, httpMethodEl].forEach(element => {
-        element.addEventListener('input', updatePreview);
+        element?.addEventListener('input', updatePreview);
     });
 
     // Quick Presets Handler
-    presetSelect.addEventListener('change', (e) => {
+    presetSelect?.addEventListener('change', (e) => {
         const preset = PRESETS[e.target.value];
         if (preset) {
-            alertIdEl.value = preset.id;
-            accountEl.value = preset.account;
-            alertTimeEl.value = preset.time;
-            eventDetailsEl.value = preset.event;
+            if (alertIdEl) alertIdEl.value = preset.id;
+            if (accountEl) accountEl.value = preset.account;
+            if (alertTimeEl) alertTimeEl.value = preset.time;
+            if (eventDetailsEl) eventDetailsEl.value = preset.event;
 
             // Trigger Severity click
-            const targetBtn = severitySelector.querySelector(`[data-level="${preset.level}"]`);
+            const targetBtn = severitySelector?.querySelector(`[data-level="${preset.level}"]`);
             if (targetBtn) targetBtn.click();
 
             showToast(`Loaded preset: "${e.target.options[e.target.selectedIndex].text}"`, 'info');
@@ -489,7 +487,8 @@
     });
 
     // Auto-generate ID Handler
-    document.getElementById('autoGenerateIdBtn').addEventListener('click', () => {
+    document.getElementById('autoGenerateIdBtn')?.addEventListener('click', () => {
+        if (!alertIdEl) return;
         const currentVal = parseInt(alertIdEl.value, 10);
         if (!isNaN(currentVal)) {
             alertIdEl.value = (currentVal + 1).toString();
@@ -501,7 +500,8 @@
     });
 
     // Set Time to Now
-    document.getElementById('useCurrentTimeBtn').addEventListener('click', () => {
+    document.getElementById('useCurrentTimeBtn')?.addEventListener('click', () => {
+        if (!alertTimeEl) return;
         const now = new Date();
         alertTimeEl.value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         updatePreview();
@@ -509,14 +509,14 @@
     });
 
     // Reset Form
-    document.getElementById('resetFormBtn').addEventListener('click', () => {
-        alertIdEl.value = '11';
-        accountEl.value = 'imani';
-        alertTimeEl.value = '11:15 AM';
-        eventDetailsEl.value = 'Multiple failed login attempts on online banking portal from suspicious IP in Johannesburg, South Africa';
-        presetSelect.selectedIndex = 0;
+    document.getElementById('resetFormBtn')?.addEventListener('click', () => {
+        if (alertIdEl) alertIdEl.value = '11';
+        if (accountEl) accountEl.value = 'imani';
+        if (alertTimeEl) alertTimeEl.value = '11:15 AM';
+        if (eventDetailsEl) eventDetailsEl.value = 'Multiple failed login attempts on online banking portal from suspicious IP in Johannesburg, South Africa';
+        if (presetSelect) presetSelect.selectedIndex = 0;
 
-        const targetBtn = severitySelector.querySelector(`[data-level="critical"]`);
+        const targetBtn = severitySelector?.querySelector(`[data-level="critical"]`);
         if (targetBtn) targetBtn.click();
 
         updatePreview();
@@ -528,13 +528,13 @@
     const endpointFields = document.getElementById('endpointFields');
     const endpointChevron = document.getElementById('endpointChevron');
 
-    toggleEndpointBtn.addEventListener('click', () => {
-        endpointFields.classList.toggle('hidden');
-        endpointChevron.classList.toggle('rotate-180');
+    toggleEndpointBtn?.addEventListener('click', () => {
+        if (endpointFields) endpointFields.classList.toggle('hidden');
+        if (endpointChevron) endpointChevron.classList.toggle('rotate-180');
     });
 
     // Dynamic Preview Tabs
-    document.getElementById('previewTabs').addEventListener('click', (e) => {
+    document.getElementById('previewTabs')?.addEventListener('click', (e) => {
         const btn = e.target.closest('.tab-btn');
         if (!btn) return;
 
@@ -545,30 +545,32 @@
 
         btn.className = 'tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-slate-800 text-cyan-400';
 
-        if (currentTab === 'curl') {
-            curlPreviewEl.classList.remove('hidden');
-            jsonPreviewEl.classList.add('hidden');
-        } else {
-            curlPreviewEl.classList.add('hidden');
-            jsonPreviewEl.classList.remove('hidden');
+        if (curlPreviewEl && jsonPreviewEl) {
+            if (currentTab === 'curl') {
+                curlPreviewEl.classList.remove('hidden');
+                jsonPreviewEl.classList.add('hidden');
+            } else {
+                curlPreviewEl.classList.add('hidden');
+                jsonPreviewEl.classList.remove('hidden');
+            }
         }
     });
 
     // Get Active Form Payload Object
     function getPayloadObject() {
         return {
-            id: alertIdEl.value.trim(),
-            account: accountEl.value.trim(),
-            level: levelEl.value.trim(),
-            time: alertTimeEl.value.trim(),
-            event: eventDetailsEl.value.trim()
+            id: alertIdEl ? alertIdEl.value.trim() : '',
+            account: accountEl ? accountEl.value.trim() : '',
+            level: levelEl ? levelEl.value.trim() : '',
+            time: alertTimeEl ? alertTimeEl.value.trim() : '',
+            event: eventDetailsEl ? eventDetailsEl.value.trim() : ''
         };
     }
 
     // Build cURL String
     function generateCurlCommand(payload) {
-        const method = httpMethodEl.value;
-        const url = targetUrlEl.value.trim();
+        const method = httpMethodEl ? httpMethodEl.value : 'POST';
+        const url = targetUrlEl ? targetUrlEl.value.trim() : '';
         const jsonString = JSON.stringify(payload, null, 2);
 
         return `curl -X '${method}' \\\n  '${url}' \\\n  -H 'accept: */*' \\\n  -H 'Content-Type: application/json' \\\n  -d '${jsonString}'`;
@@ -579,8 +581,8 @@
         const payload = getPayloadObject();
         const curlText = generateCurlCommand(payload);
 
-        curlPreviewEl.textContent = curlText;
-        jsonPreviewEl.innerHTML = syntaxHighlightJson(payload);
+        if (curlPreviewEl) curlPreviewEl.textContent = curlText;
+        if (jsonPreviewEl) jsonPreviewEl.innerHTML = syntaxHighlightJson(payload);
     }
 
     // Syntax Highlight JSON Utility
@@ -603,7 +605,7 @@
     }
 
     // Copy Code Button Handler
-    document.getElementById('copyActivePreviewBtn').addEventListener('click', () => {
+    document.getElementById('copyActivePreviewBtn')?.addEventListener('click', () => {
         const payload = getPayloadObject();
         const textToCopy = currentTab === 'curl'
             ? generateCurlCommand(payload)
@@ -624,17 +626,17 @@
     }
 
     // Push Alert HTTP Execution Logic
-    sendAlertBtn.addEventListener('click', async () => {
+    sendAlertBtn?.addEventListener('click', async () => {
         const payload = getPayloadObject();
-        const url = targetUrlEl.value.trim();
-        const method = httpMethodEl.value;
+        const url = targetUrlEl ? targetUrlEl.value.trim() : '';
+        const method = httpMethodEl ? httpMethodEl.value : 'POST';
         const startTime = performance.now();
 
         // UI Loading state
         sendAlertBtn.disabled = true;
         sendAlertBtn.classList.add('opacity-80', 'cursor-not-allowed');
         sendAlertBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Dispatching Alert...`;
-        lucide.createIcons();
+        if (window.lucide) lucide.createIcons();
 
         logConsole('info', `Sending ${method} request to ${url}...`);
 
@@ -695,12 +697,13 @@
             sendAlertBtn.disabled = false;
             sendAlertBtn.classList.remove('opacity-80', 'cursor-not-allowed');
             sendAlertBtn.innerHTML = `<i data-lucide="send" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i> <span>Push Alert Now</span>`;
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         }
     });
 
     // Update Console Response Badge
     function updateStatusBadge(text, isSuccess) {
+        if (!statusBadge) return;
         statusBadge.classList.remove('hidden', 'bg-emerald-500/20', 'text-emerald-400', 'border-emerald-500/30', 'bg-rose-500/20', 'text-rose-400', 'border-rose-500/30');
         statusBadge.classList.add('border');
 
@@ -715,6 +718,7 @@
 
     // Console Logging Function
     function logConsole(type, title, details = null) {
+        if (!consoleBody) return;
         const timestamp = new Date().toLocaleTimeString();
         let colorClass = 'text-cyan-400';
         if (type === 'error') colorClass = 'text-rose-400';
@@ -753,7 +757,8 @@
 
     // Render Sent Alerts History
     function renderHistory() {
-        const query = historySearch.value.toLowerCase();
+        if (!historyTableBody) return;
+        const query = historySearch ? historySearch.value.toLowerCase() : '';
         const filtered = alertHistory.filter(item => {
             return item.id.toLowerCase().includes(query) ||
                 item.account.toLowerCase().includes(query) ||
@@ -761,7 +766,7 @@
                 item.event.toLowerCase().includes(query);
         });
 
-        historyCount.textContent = alertHistory.length;
+        if (historyCount) historyCount.textContent = alertHistory.length;
 
         if (filtered.length === 0) {
             historyTableBody.innerHTML = `
@@ -801,14 +806,14 @@
         </tr>
       `).join('');
 
-        lucide.createIcons();
+        if (window.lucide) lucide.createIcons();
     }
 
     // Search Filter Event Handler
-    historySearch.addEventListener('input', renderHistory);
+    historySearch?.addEventListener('input', renderHistory);
 
     // Clear History Handler
-    document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+    document.getElementById('clearHistoryBtn')?.addEventListener('click', () => {
         if (alertHistory.length === 0) return;
         alertHistory = [];
         renderHistory();
@@ -820,12 +825,12 @@
         const item = alertHistory.find(a => a.id === id);
         if (!item) return;
 
-        alertIdEl.value = item.id;
-        accountEl.value = item.account;
-        alertTimeEl.value = item.time;
-        eventDetailsEl.value = item.event;
+        if (alertIdEl) alertIdEl.value = item.id;
+        if (accountEl) accountEl.value = item.account;
+        if (alertTimeEl) alertTimeEl.value = item.time;
+        if (eventDetailsEl) eventDetailsEl.value = item.event;
 
-        const targetBtn = severitySelector.querySelector(`[data-level="${item.level}"]`);
+        const targetBtn = severitySelector?.querySelector(`[data-level="${item.level}"]`);
         if (targetBtn) targetBtn.click();
 
         updatePreview();
@@ -844,6 +849,7 @@
     // Toast Notification System
     function showToast(message, type = 'info') {
         const container = document.getElementById('toastContainer');
+        if (!container) return;
         const toast = document.createElement('div');
 
         const iconMap = {
@@ -865,7 +871,7 @@
       `;
 
         container.appendChild(toast);
-        lucide.createIcons();
+        if (window.lucide) lucide.createIcons();
 
         // Trigger animation
         requestAnimationFrame(() => {
@@ -881,9 +887,14 @@
 
     // Modal Control Logic
     const helpModal = document.getElementById('helpModal');
-    document.getElementById('quickHelpBtn').addEventListener('click', () => helpModal.classList.remove('hidden', 'flex') || helpModal.classList.add('flex'));
-    document.getElementById('closeHelpModal').addEventListener('click', () => helpModal.classList.add('hidden'));
-    document.getElementById('dismissHelpModal').addEventListener('click', () => helpModal.classList.add('hidden'));
+    document.getElementById('quickHelpBtn')?.addEventListener('click', () => {
+        if (helpModal) {
+            helpModal.classList.remove('hidden', 'flex');
+            helpModal.classList.add('flex');
+        }
+    });
+    document.getElementById('closeHelpModal')?.addEventListener('click', () => helpModal?.classList.add('hidden'));
+    document.getElementById('dismissHelpModal')?.addEventListener('click', () => helpModal?.classList.add('hidden'));
 
 </script>
 </body>

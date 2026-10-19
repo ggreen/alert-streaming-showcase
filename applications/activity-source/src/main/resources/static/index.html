@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Activity Poster Studio</title>
+    <title>Source Activity Supplier</title>
 
     <!-- Google Fonts: Inter & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,7 +65,7 @@
                 <i class="fa-solid fa-bolt text-lg"></i>
             </div>
             <div>
-                <h1 class="font-bold text-lg leading-tight tracking-tight text-slate-900 dark:text-white">Activity Dispatch Studio</h1>
+                <h1 class="font-bold text-lg leading-tight tracking-tight text-slate-900 dark:text-white">Source Activity Supplier</h1>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Post telemetry and audit events to local REST API</p>
             </div>
         </div>
@@ -94,7 +94,7 @@
         <div class="lg:col-span-7 space-y-6">
 
             <!-- Target API Endpoint Settings Card -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm transition-all">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm transition-all"  style="display: none;">
                 <div class="flex items-center justify-between mb-3">
                     <label for="endpointUrl" class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
                         <i class="fa-solid fa-server text-blue-500"></i> Target Endpoint URL
@@ -104,7 +104,7 @@
                     </button>
                 </div>
                 <div class="relative flex items-center">
-                    <input type="url" id="endpointUrl" value="http://localhost:6662/activities/activity" required
+                    <input type="url" id="endpointUrl" value="/activities/activity" required
                            class="w-full pl-3.5 pr-24 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" />
                     <span class="absolute right-3 text-xs font-semibold px-2 py-1 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded-lg">POST</span>
                 </div>
@@ -252,7 +252,7 @@
         <div class="lg:col-span-5 space-y-6">
 
             <!-- Live Payload Preview Card -->
-            <div class="bg-slate-900 text-slate-100 rounded-2xl p-5 border border-slate-800 shadow-lg space-y-4">
+            <div class="bg-slate-900 text-slate-100 rounded-2xl p-5 border border-slate-800 shadow-lg space-y-4"  style="display: none;">
                 <div class="flex items-center justify-between pb-3 border-b border-slate-800">
             <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
               <i class="fa-solid fa-code text-emerald-400"></i> Live Request Payload
@@ -430,7 +430,7 @@
     }
     endpointUrlInput.addEventListener('input', updateEndpointBadge);
     resetEndpointBtn.addEventListener('click', () => {
-        endpointUrlInput.value = 'http://localhost:6662/activities/activity';
+        endpointUrlInput.value = '/activities/activity';
         updateEndpointBadge();
         showToast("Endpoint URL reset to default", "info");
     });

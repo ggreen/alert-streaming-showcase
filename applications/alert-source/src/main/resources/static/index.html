@@ -1,6 +1,890 @@
-<h1>HTTP Source</h1>
-<hr/>
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOC Alert Dispatcher & API Tester</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-<ul>
-    <li><a href="/swagger-ui.html">Swagger-UI</a></li>
-</ul>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar for Code Block and Logs */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        .json-key { color: #38bdf8; }
+        .json-string { color: #4ade80; }
+        .json-number { color: #facc15; }
+        .json-boolean { color: #f472b6; }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans antialiased bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950">
+
+<!-- Header -->
+<header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg text-cyan-400">
+                <i data-lucide="shield-alert" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-white tracking-wide flex items-center gap-2">
+                    SOC Alert Dispatcher
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-950 border border-cyan-800 text-cyan-400 font-mono">v1.2</span>
+                </h1>
+                <p class="text-xs text-slate-400">Security Incident Response & API Payload Tester</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <button id="quickHelpBtn" class="text-slate-400 hover:text-slate-200 p-2 rounded-lg hover:bg-slate-800 transition text-sm flex items-center gap-1.5 border border-slate-800">
+                <i data-lucide="help-circle" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">Docs & Help</span>
+            </button>
+            <div class="h-4 w-px bg-slate-800"></div>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Dispatcher Active
+        </span>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content Grid -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- LEFT COLUMN: Form Inputs & Presets (5 Cols) -->
+    <section class="lg:col-span-5 space-y-6 flex flex-col">
+
+        <!-- Preset Selector -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 shadow-xl">
+            <div class="flex items-center justify-between mb-2">
+                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-cyan-400"></i>
+                    Quick Scenario Presets
+                </label>
+            </div>
+            <select id="presetSelect" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 transition">
+                <option value="" disabled selected>-- Choose a sample incident template --</option>
+                <option value="example">Original Example (Johannesburg Login)</option>
+                <option value="suspicious_login">Suspicious Online Banking Login</option>
+                <option value="unauthorized_withdrawal">Unauthorized Large Withdrawal</option>
+                <option value="rate_limit">API Rate Limit Exceeded</option>
+                <option value="db_storage">Database Storage Capacity Warning</option>
+                <option value="brute_force">SSH Brute Force Attack Detected</option>
+            </select>
+        </div>
+
+        <!-- Main Alert Form -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4 flex-1">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                    <i data-lucide="sliders" class="w-4 h-4 text-cyan-400"></i>
+                    Alert Payload Properties
+                </h2>
+                <button id="resetFormBtn" type="button" class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 hover:underline">
+                    <i data-lucide="rotate-ccw" class="w-3 h-3"></i> Reset Form
+                </button>
+            </div>
+
+            <form id="alertForm" class="space-y-4" onsubmit="return false;">
+
+                <!-- ID & Account Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Alert ID -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">
+                            Alert ID <span class="text-rose-400">*</span>
+                        </label>
+                        <div class="relative flex">
+                            <input type="text" id="alertId" required value="11" class="w-full bg-slate-950 border border-slate-700/80 rounded-l-lg px-3 py-2 text-sm text-slate-100 font-mono focus:outline-none focus:border-cyan-500 transition" />
+                            <button type="button" id="autoGenerateIdBtn" title="Auto-increment / Generate ID" class="bg-slate-800 border border-l-0 border-slate-700/80 hover:bg-slate-700 text-slate-300 px-3 rounded-r-lg text-xs flex items-center transition">
+                                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Account Name -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">
+                            Account Name <span class="text-rose-400">*</span>
+                        </label>
+                        <input type="text" id="account" required value="imani" placeholder="e.g. imani" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-sm text-slate-100 font-mono focus:outline-none focus:border-cyan-500 transition" />
+                    </div>
+                </div>
+
+                <!-- Alert Level Segmented Picker -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1.5">
+                        Severity Level <span class="text-rose-400">*</span>
+                    </label>
+                    <div class="grid grid-cols-4 gap-1.5 bg-slate-950 p-1.5 rounded-lg border border-slate-800" id="severitySelector">
+                        <button type="button" data-level="low" class="severity-btn py-1.5 text-xs font-semibold rounded-md border border-transparent transition text-slate-400 hover:text-emerald-400">
+                            Low
+                        </button>
+                        <button type="button" data-level="medium" class="severity-btn py-1.5 text-xs font-semibold rounded-md border border-transparent transition text-slate-400 hover:text-amber-400">
+                            Medium
+                        </button>
+                        <button type="button" data-level="high" class="severity-btn py-1.5 text-xs font-semibold rounded-md border border-transparent transition text-slate-400 hover:text-orange-400">
+                            High
+                        </button>
+                        <button type="button" data-level="critical" class="severity-btn py-1.5 text-xs font-semibold rounded-md border border-transparent transition bg-rose-500/20 text-rose-400 border-rose-500/40 shadow-sm">
+                            Critical
+                        </button>
+                    </div>
+                    <input type="hidden" id="level" value="critical" />
+                </div>
+
+                <!-- Time Picker Input -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-medium text-slate-300">
+                            Timestamp <span class="text-rose-400">*</span>
+                        </label>
+                        <button type="button" id="useCurrentTimeBtn" class="text-[11px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
+                            <i data-lucide="clock" class="w-3 h-3"></i> Set to Now
+                        </button>
+                    </div>
+                    <input type="text" id="alertTime" required value="11:15 AM" placeholder="e.g. 11:15 AM or ISO string" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-sm text-slate-100 font-mono focus:outline-none focus:border-cyan-500 transition" />
+                </div>
+
+                <!-- Event Details -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">
+                        Event Details <span class="text-rose-400">*</span>
+                    </label>
+                    <textarea id="eventDetails" rows="4" required class="w-full bg-slate-950 border border-slate-700/80 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 transition font-sans leading-relaxed resize-y">Multiple failed login attempts on online banking portal from suspicious IP in Johannesburg, South Africa</textarea>
+                </div>
+
+                <!-- Target Endpoint Accordion/Settings -->
+                <div class="border border-slate-800 rounded-lg bg-slate-950/60 p-3 space-y-3">
+                    <div class="flex items-center justify-between cursor-pointer" id="toggleEndpointSettings">
+              <span class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="network" class="w-3.5 h-3.5 text-cyan-400"></i>
+                Target Endpoint & API Settings
+              </span>
+                        <i data-lucide="chevron-down" id="endpointChevron" class="w-4 h-4 text-slate-400 transition-transform duration-200"></i>
+                    </div>
+
+                    <div id="endpointFields" class="space-y-3 pt-2 border-t border-slate-800/80">
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-400 mb-1">Target Endpoint URL</label>
+                            <div class="flex gap-2">
+                                <select id="httpMethod" class="bg-slate-900 border border-slate-700 text-xs text-cyan-400 font-mono font-bold rounded-lg px-2.5 py-1.5 focus:outline-none">
+                                    <option value="POST">POST</option>
+                                    <option value="PUT">PUT</option>
+                                    <option value="PATCH">PATCH</option>
+                                </select>
+                                <input type="text" id="targetUrl" value="/alerts/alert" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-500 transition" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-400 font-mono">
+                            <div class="bg-slate-900/80 p-2 rounded border border-slate-800 truncate">
+                                <span class="text-slate-500">Content-Type:</span> application/json
+                            </div>
+                            <div class="bg-slate-900/80 p-2 rounded border border-slate-800 truncate">
+                                <span class="text-slate-500">Accept:</span> */*
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Submit Button -->
+                <button id="sendAlertBtn" type="button" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-cyan-600/20 hover:shadow-cyan-500/30 transition-all flex items-center justify-center gap-2 group">
+                    <i data-lucide="send" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
+                    <span>Push Alert Now</span>
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- RIGHT COLUMN: cURL, JSON Payload, Response Console & History (7 Cols) -->
+    <section class="lg:col-span-7 space-y-6 flex flex-col">
+
+        <!-- Dynamic Code Preview Section -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl overflow-hidden shadow-xl flex flex-col">
+            <!-- Tabs Header -->
+            <div class="flex items-center justify-between border-b border-slate-800 bg-slate-950/60 px-4 py-2">
+                <div class="flex space-x-1" id="previewTabs">
+                    <button data-tab="curl" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-slate-800 text-cyan-400">
+                        <i data-lucide="terminal" class="w-3.5 h-3.5"></i> Live cURL Command
+                    </button>
+                    <button data-tab="json" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 text-slate-400 hover:text-slate-200">
+                        <i data-lucide="code-2" class="w-3.5 h-3.5"></i> JSON Payload
+                    </button>
+                </div>
+
+                <button id="copyActivePreviewBtn" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-2.5 py-1 rounded-md flex items-center gap-1 transition">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Code
+                </button>
+            </div>
+
+            <!-- Code Displays -->
+            <div class="p-4 bg-slate-950/90 font-mono text-xs overflow-x-auto min-h-[140px] max-h-[220px]">
+                <!-- cURL Tab Content -->
+                <pre id="curlPreview" class="text-slate-200 whitespace-pre-wrap break-all leading-relaxed"></pre>
+                <!-- JSON Tab Content -->
+                <pre id="jsonPreview" class="hidden leading-relaxed"></pre>
+            </div>
+        </div>
+
+        <!-- Execution Console / Response Section -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl overflow-hidden shadow-xl flex flex-col">
+            <div class="flex items-center justify-between border-b border-slate-800 px-4 py-3 bg-slate-950/40">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i>
+                    <h3 class="text-sm font-semibold text-white">Execution Console</h3>
+                </div>
+                <div id="statusBadge" class="hidden px-2 py-0.5 rounded text-[11px] font-mono font-semibold"></div>
+            </div>
+
+            <div id="consoleBody" class="p-4 font-mono text-xs bg-slate-950/80 min-h-[120px] max-h-[200px] overflow-y-auto space-y-2">
+                <p class="text-slate-500 italic">No request sent yet. Click "Push Alert Now" to dispatch payload to target API.</p>
+            </div>
+        </div>
+
+        <!-- History Log Table -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl overflow-hidden shadow-xl flex-1 flex flex-col">
+            <div class="p-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-950/40">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="history" class="w-4 h-4 text-cyan-400"></i>
+                    <h3 class="text-sm font-semibold text-white">Sent Alerts History</h3>
+                    <span id="historyCount" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">0</span>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <!-- Search Filter -->
+                    <div class="relative">
+                        <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-500"></i>
+                        <input type="text" id="historySearch" placeholder="Search history..." class="bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 w-36 sm:w-48 transition" />
+                    </div>
+
+                    <button id="clearHistoryBtn" title="Clear sent log history" class="p-1.5 text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-900/50 rounded-lg bg-slate-950 transition">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- History Table Container -->
+            <div class="overflow-x-auto flex-1 max-h-[300px]">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-950/80 text-slate-400 text-[11px] uppercase tracking-wider border-b border-slate-800 sticky top-0">
+                    <tr>
+                        <th class="px-3 py-2.5">ID</th>
+                        <th class="px-3 py-2.5">Level</th>
+                        <th class="px-3 py-2.5">Account</th>
+                        <th class="px-3 py-2.5">Event details</th>
+                        <th class="px-3 py-2.5">Sent Time</th>
+                        <th class="px-3 py-2.5 text-right">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody id="historyTableBody" class="divide-y divide-slate-800/60 font-sans">
+                    <tr id="emptyHistoryRow">
+                        <td colspan="6" class="px-4 py-8 text-center text-slate-500 italic">
+                            No alerts dispatched in this session yet.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </section>
+
+</main>
+
+<!-- Toast Notification Container -->
+<div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+<!-- Help / Docs Modal -->
+<div id="helpModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 max-w-md w-full rounded-2xl p-6 shadow-2xl relative space-y-4">
+        <button id="closeHelpModal" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <div class="flex items-center gap-2 text-cyan-400">
+            <i data-lucide="book-open" class="w-5 h-5"></i>
+            <h3 class="font-bold text-white text-base">Alert Dispatcher Help</h3>
+        </div>
+
+        <div class="text-xs text-slate-300 space-y-2 leading-relaxed">
+            <p>This tool allows Security Engineers and Developers to construct and test real-time security alerts sent directly to endpoint APIs.</p>
+            <ul class="list-disc pl-4 space-y-1 text-slate-400">
+                <li><strong class="text-slate-200">cURL Mirroring:</strong> Generates formatted cURL identical to your server execution string.</li>
+                <li><strong class="text-slate-200">Severity Badges:</strong> Standardized visual hierarchy (Low, Medium, High, Critical).</li>
+                <li><strong class="text-slate-200">Local Testing:</strong> If target server <code class="text-cyan-400 bg-slate-950 px-1 py-0.5 rounded">http://localhost:6661</code> is offline, direct standard CORS browser errors will be handled gracefully in the execution log.</li>
+            </ul>
+        </div>
+
+        <div class="pt-2 border-t border-slate-800 flex justify-end">
+            <button id="dismissHelpModal" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-1.5 rounded-lg text-xs font-semibold">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript Logic -->
+<script>
+    // State Management
+    let currentTab = 'curl';
+    let alertHistory = [];
+
+    // Presets Database
+    const PRESETS = {
+        example: {
+            id: "11",
+            account: "imani",
+            level: "critical",
+            time: "11:15 AM",
+            event: "Multiple failed login attempts on online banking portal from suspicious IP in Johannesburg, South Africa"
+        },
+        suspicious_login: {
+            id: "102",
+            account: "alex_dev",
+            level: "high",
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            event: "Impossible travel detected: Account logged in from Tokyo and Frankfurt within 5 minutes"
+        },
+        unauthorized_withdrawal: {
+            id: "103",
+            account: "corp_treasury",
+            level: "critical",
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            event: "High-value outbound wire transfer request of $250,000 triggered step-up MFA anomaly policy"
+        },
+        rate_limit: {
+            id: "104",
+            account: "partner_api_v2",
+            level: "medium",
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            event: "Threshold exceeded: 12,000 requests/min from API client key ending in ...8F2A"
+        },
+        db_storage: {
+            id: "105",
+            account: "db_cluster_prod",
+            level: "low",
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            event: "Storage capacity threshold reached: Postgres Primary Volume /dev/nvme0n1 at 88% capacity"
+        },
+        brute_force: {
+            id: "106",
+            account: "root_admin",
+            level: "critical",
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            event: "SSH service targeted by brute-force attack from 192.168.1.105 (Over 500 auth failures/sec)"
+        }
+    };
+
+    // DOM Elements
+    const alertIdEl = document.getElementById('alertId');
+    const accountEl = document.getElementById('account');
+    const levelEl = document.getElementById('level');
+    const alertTimeEl = document.getElementById('alertTime');
+    const eventDetailsEl = document.getElementById('eventDetails');
+    const targetUrlEl = document.getElementById('targetUrl');
+    const httpMethodEl = document.getElementById('httpMethod');
+
+    const curlPreviewEl = document.getElementById('curlPreview');
+    const jsonPreviewEl = document.getElementById('jsonPreview');
+    const presetSelect = document.getElementById('presetSelect');
+    const severitySelector = document.getElementById('severitySelector');
+    const sendAlertBtn = document.getElementById('sendAlertBtn');
+
+    const consoleBody = document.getElementById('consoleBody');
+    const statusBadge = document.getElementById('statusBadge');
+    const historyTableBody = document.getElementById('historyTableBody');
+    const historyCount = document.getElementById('historyCount');
+    const historySearch = document.getElementById('historySearch');
+
+    // Initialize Lucide Icons
+    window.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+        updatePreview();
+    });
+
+    // Handle Severity Buttons Selection
+    severitySelector.addEventListener('click', (e) => {
+        const btn = e.target.closest('.severity-btn');
+        if (!btn) return;
+
+        const level = btn.getAttribute('data-level');
+        levelEl.value = level;
+
+        // Update UI button active states
+        document.querySelectorAll('.severity-btn').forEach(b => {
+            b.className = 'severity-btn py-1.5 text-xs font-semibold rounded-md border border-transparent transition text-slate-400 hover:text-slate-200';
+        });
+
+        const colorMap = {
+            low: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-sm',
+            medium: 'bg-amber-500/20 text-amber-400 border-amber-500/40 shadow-sm',
+            high: 'bg-orange-500/20 text-orange-400 border-orange-500/40 shadow-sm',
+            critical: 'bg-rose-500/20 text-rose-400 border-rose-500/40 shadow-sm'
+        };
+
+        btn.className = `severity-btn py-1.5 text-xs font-semibold rounded-md border transition ${colorMap[level]}`;
+        updatePreview();
+    });
+
+    // Synchronize Input Changes with Dynamic Code Generators
+    [alertIdEl, accountEl, alertTimeEl, eventDetailsEl, targetUrlEl, httpMethodEl].forEach(element => {
+        element.addEventListener('input', updatePreview);
+    });
+
+    // Quick Presets Handler
+    presetSelect.addEventListener('change', (e) => {
+        const preset = PRESETS[e.target.value];
+        if (preset) {
+            alertIdEl.value = preset.id;
+            accountEl.value = preset.account;
+            alertTimeEl.value = preset.time;
+            eventDetailsEl.value = preset.event;
+
+            // Trigger Severity click
+            const targetBtn = severitySelector.querySelector(`[data-level="${preset.level}"]`);
+            if (targetBtn) targetBtn.click();
+
+            showToast(`Loaded preset: "${e.target.options[e.target.selectedIndex].text}"`, 'info');
+        }
+    });
+
+    // Auto-generate ID Handler
+    document.getElementById('autoGenerateIdBtn').addEventListener('click', () => {
+        const currentVal = parseInt(alertIdEl.value, 10);
+        if (!isNaN(currentVal)) {
+            alertIdEl.value = (currentVal + 1).toString();
+        } else {
+            alertIdEl.value = Math.floor(100 + Math.random() * 900).toString();
+        }
+        updatePreview();
+        showToast('Alert ID auto-incremented', 'info');
+    });
+
+    // Set Time to Now
+    document.getElementById('useCurrentTimeBtn').addEventListener('click', () => {
+        const now = new Date();
+        alertTimeEl.value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        updatePreview();
+        showToast('Timestamp set to current time', 'info');
+    });
+
+    // Reset Form
+    document.getElementById('resetFormBtn').addEventListener('click', () => {
+        alertIdEl.value = '11';
+        accountEl.value = 'imani';
+        alertTimeEl.value = '11:15 AM';
+        eventDetailsEl.value = 'Multiple failed login attempts on online banking portal from suspicious IP in Johannesburg, South Africa';
+        presetSelect.selectedIndex = 0;
+
+        const targetBtn = severitySelector.querySelector(`[data-level="critical"]`);
+        if (targetBtn) targetBtn.click();
+
+        updatePreview();
+        showToast('Form reset to default values', 'info');
+    });
+
+    // Toggle Endpoint Settings Accordion
+    const toggleEndpointBtn = document.getElementById('toggleEndpointSettings');
+    const endpointFields = document.getElementById('endpointFields');
+    const endpointChevron = document.getElementById('endpointChevron');
+
+    toggleEndpointBtn.addEventListener('click', () => {
+        endpointFields.classList.toggle('hidden');
+        endpointChevron.classList.toggle('rotate-180');
+    });
+
+    // Dynamic Preview Tabs
+    document.getElementById('previewTabs').addEventListener('click', (e) => {
+        const btn = e.target.closest('.tab-btn');
+        if (!btn) return;
+
+        currentTab = btn.getAttribute('data-tab');
+        document.querySelectorAll('#previewTabs .tab-btn').forEach(b => {
+            b.className = 'tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 text-slate-400 hover:text-slate-200';
+        });
+
+        btn.className = 'tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-slate-800 text-cyan-400';
+
+        if (currentTab === 'curl') {
+            curlPreviewEl.classList.remove('hidden');
+            jsonPreviewEl.classList.add('hidden');
+        } else {
+            curlPreviewEl.classList.add('hidden');
+            jsonPreviewEl.classList.remove('hidden');
+        }
+    });
+
+    // Get Active Form Payload Object
+    function getPayloadObject() {
+        return {
+            id: alertIdEl.value.trim(),
+            account: accountEl.value.trim(),
+            level: levelEl.value.trim(),
+            time: alertTimeEl.value.trim(),
+            event: eventDetailsEl.value.trim()
+        };
+    }
+
+    // Build cURL String
+    function generateCurlCommand(payload) {
+        const method = httpMethodEl.value;
+        const url = targetUrlEl.value.trim();
+        const jsonString = JSON.stringify(payload, null, 2);
+
+        return `curl -X '${method}' \\\n  '${url}' \\\n  -H 'accept: */*' \\\n  -H 'Content-Type: application/json' \\\n  -d '${jsonString}'`;
+    }
+
+    // Update Live Code Previews
+    function updatePreview() {
+        const payload = getPayloadObject();
+        const curlText = generateCurlCommand(payload);
+
+        curlPreviewEl.textContent = curlText;
+        jsonPreviewEl.innerHTML = syntaxHighlightJson(payload);
+    }
+
+    // Syntax Highlight JSON Utility
+    function syntaxHighlightJson(jsonObj) {
+        let json = JSON.stringify(jsonObj, null, 2);
+        json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+            let cls = 'json-number';
+            if (/^"/.test(match)) {
+                if (/:$/.test(match)) {
+                    cls = 'json-key';
+                } else {
+                    cls = 'json-string';
+                }
+            } else if (/true|false/.test(match)) {
+                cls = 'json-boolean';
+            }
+            return `<span class="${cls}">${match}</span>`;
+        });
+    }
+
+    // Copy Code Button Handler
+    document.getElementById('copyActivePreviewBtn').addEventListener('click', () => {
+        const payload = getPayloadObject();
+        const textToCopy = currentTab === 'curl'
+            ? generateCurlCommand(payload)
+            : JSON.stringify(payload, null, 2);
+
+        copyToClipboard(textToCopy);
+        showToast(`Copied ${currentTab.toUpperCase()} to clipboard!`, 'success');
+    });
+
+    // Copy Helper
+    function copyToClipboard(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+    }
+
+    // Push Alert HTTP Execution Logic
+    sendAlertBtn.addEventListener('click', async () => {
+        const payload = getPayloadObject();
+        const url = targetUrlEl.value.trim();
+        const method = httpMethodEl.value;
+        const startTime = performance.now();
+
+        // UI Loading state
+        sendAlertBtn.disabled = true;
+        sendAlertBtn.classList.add('opacity-80', 'cursor-not-allowed');
+        sendAlertBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Dispatching Alert...`;
+        lucide.createIcons();
+
+        logConsole('info', `Sending ${method} request to ${url}...`);
+
+        let responseStatus = null;
+        let responseBody = null;
+        let isSuccess = false;
+
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: {
+                    'Accept': '*/*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const duration = Math.round(performance.now() - startTime);
+            responseStatus = `${res.status} ${res.statusText || ''}`;
+            isSuccess = res.ok;
+
+            let dataText = '';
+            try {
+                dataText = await res.text();
+                responseBody = JSON.parse(dataText);
+            } catch(e) {
+                responseBody = dataText || '(Empty Response)';
+            }
+
+            updateStatusBadge(res.status, isSuccess);
+
+            logConsole('success', `Response Received (${duration}ms):`, {
+                status: res.status,
+                headers: Object.fromEntries(res.headers.entries()),
+                body: responseBody
+            });
+
+            showToast(`Alert #${payload.id} successfully dispatched!`, 'success');
+
+        } catch (error) {
+            const duration = Math.round(performance.now() - startTime);
+            isSuccess = false;
+            responseStatus = 'FETCH_ERROR';
+
+            updateStatusBadge('FAILED', false);
+
+            logConsole('error', `Dispatch Failed (${duration}ms):`, {
+                error: error.message,
+                hint: `Ensure server is running at '${url}' or CORS headers are permitted.`
+            });
+
+            showToast(`Failed to connect to ${url}`, 'error');
+        } finally {
+            // Add to History
+            addToHistory(payload, responseStatus, isSuccess);
+
+            // Restore Button State
+            sendAlertBtn.disabled = false;
+            sendAlertBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+            sendAlertBtn.innerHTML = `<i data-lucide="send" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i> <span>Push Alert Now</span>`;
+            lucide.createIcons();
+        }
+    });
+
+    // Update Console Response Badge
+    function updateStatusBadge(text, isSuccess) {
+        statusBadge.classList.remove('hidden', 'bg-emerald-500/20', 'text-emerald-400', 'border-emerald-500/30', 'bg-rose-500/20', 'text-rose-400', 'border-rose-500/30');
+        statusBadge.classList.add('border');
+
+        if (isSuccess) {
+            statusBadge.classList.add('bg-emerald-500/20', 'text-emerald-400', 'border-emerald-500/30');
+            statusBadge.textContent = `HTTP ${text}`;
+        } else {
+            statusBadge.classList.add('bg-rose-500/20', 'text-rose-400', 'border-rose-500/30');
+            statusBadge.textContent = text;
+        }
+    }
+
+    // Console Logging Function
+    function logConsole(type, title, details = null) {
+        const timestamp = new Date().toLocaleTimeString();
+        let colorClass = 'text-cyan-400';
+        if (type === 'error') colorClass = 'text-rose-400';
+        if (type === 'success') colorClass = 'text-emerald-400';
+
+        let html = `<div class="pb-2 border-b border-slate-800/80 last:border-0 last:pb-0">
+        <div class="flex items-center gap-2">
+          <span class="text-slate-500 text-[10px]">[${timestamp}]</span>
+          <span class="font-semibold ${colorClass}">${title}</span>
+        </div>`;
+
+        if (details) {
+            html += `<pre class="mt-1 text-[11px] text-slate-300 bg-slate-900/90 p-2 rounded border border-slate-800/80 overflow-x-auto">${syntaxHighlightJson(details)}</pre>`;
+        }
+
+        html += `</div>`;
+
+        consoleBody.innerHTML = html; // Replace console body with latest execution output
+    }
+
+    // Add Entry to Sent History Table
+    function addToHistory(payload, status, isSuccess) {
+        const emptyRow = document.getElementById('emptyHistoryRow');
+        if (emptyRow) emptyRow.remove();
+
+        const historyItem = {
+            ...payload,
+            dispatchedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            status: status,
+            isSuccess: isSuccess
+        };
+
+        alertHistory.unshift(historyItem);
+        renderHistory();
+    }
+
+    // Render Sent Alerts History
+    function renderHistory() {
+        const query = historySearch.value.toLowerCase();
+        const filtered = alertHistory.filter(item => {
+            return item.id.toLowerCase().includes(query) ||
+                item.account.toLowerCase().includes(query) ||
+                item.level.toLowerCase().includes(query) ||
+                item.event.toLowerCase().includes(query);
+        });
+
+        historyCount.textContent = alertHistory.length;
+
+        if (filtered.length === 0) {
+            historyTableBody.innerHTML = `
+          <tr>
+            <td colspan="6" class="px-4 py-6 text-center text-slate-500 italic">
+              ${alertHistory.length === 0 ? 'No alerts dispatched in this session yet.' : 'No matching alert records found.'}
+            </td>
+          </tr>`;
+            return;
+        }
+
+        const severityBadgeMap = {
+            low: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+            medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+            high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+            critical: 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+        };
+
+        historyTableBody.innerHTML = filtered.map((item, index) => `
+        <tr class="hover:bg-slate-800/40 transition group">
+          <td class="px-3 py-2.5 font-mono font-semibold text-cyan-400">#${escapeHtml(item.id)}</td>
+          <td class="px-3 py-2.5">
+            <span class="inline-block px-2 py-0.5 text-[10px] uppercase font-bold rounded border ${severityBadgeMap[item.level] || 'bg-slate-800 text-slate-300'}">
+              ${escapeHtml(item.level)}
+            </span>
+          </td>
+          <td class="px-3 py-2.5 font-mono text-slate-200">${escapeHtml(item.account)}</td>
+          <td class="px-3 py-2.5 max-w-xs truncate text-slate-300" title="${escapeHtml(item.event)}">
+            ${escapeHtml(item.event)}
+          </td>
+          <td class="px-3 py-2.5 text-slate-400 font-mono text-[11px]">${escapeHtml(item.dispatchedAt)}</td>
+          <td class="px-3 py-2.5 text-right space-x-1">
+            <button onclick="resendAlert('${escapeHtml(item.id)}')" title="Load parameters to form" class="p-1 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 rounded transition inline-flex items-center">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+
+        lucide.createIcons();
+    }
+
+    // Search Filter Event Handler
+    historySearch.addEventListener('input', renderHistory);
+
+    // Clear History Handler
+    document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+        if (alertHistory.length === 0) return;
+        alertHistory = [];
+        renderHistory();
+        showToast('Alert history log cleared', 'info');
+    });
+
+    // Re-load alert parameters from history to form
+    window.resendAlert = function(id) {
+        const item = alertHistory.find(a => a.id === id);
+        if (!item) return;
+
+        alertIdEl.value = item.id;
+        accountEl.value = item.account;
+        alertTimeEl.value = item.time;
+        eventDetailsEl.value = item.event;
+
+        const targetBtn = severitySelector.querySelector(`[data-level="${item.level}"]`);
+        if (targetBtn) targetBtn.click();
+
+        updatePreview();
+        showToast(`Loaded Alert #${id} into input form`, 'info');
+    };
+
+    // Helper Utility: HTML Escaper
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    // Toast Notification System
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+
+        const iconMap = {
+            success: 'check-circle',
+            error: 'alert-triangle',
+            info: 'info'
+        };
+
+        const colorMap = {
+            success: 'bg-emerald-950 border-emerald-700 text-emerald-200',
+            error: 'bg-rose-950 border-rose-700 text-rose-200',
+            info: 'bg-slate-900 border-slate-700 text-slate-200'
+        };
+
+        toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl border shadow-xl text-xs font-medium transition-all duration-300 transform translate-y-2 opacity-0 ${colorMap[type]}`;
+        toast.innerHTML = `
+        <i data-lucide="${iconMap[type]}" class="w-4 h-4"></i>
+        <span>${escapeHtml(message)}</span>
+      `;
+
+        container.appendChild(toast);
+        lucide.createIcons();
+
+        // Trigger animation
+        requestAnimationFrame(() => {
+            toast.classList.remove('translate-y-2', 'opacity-0');
+        });
+
+        // Remove Toast after timeout
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'translate-y-2');
+            setTimeout(() => toast.remove(), 300);
+        }, 3500);
+    }
+
+    // Modal Control Logic
+    const helpModal = document.getElementById('helpModal');
+    document.getElementById('quickHelpBtn').addEventListener('click', () => helpModal.classList.remove('hidden', 'flex') || helpModal.classList.add('flex'));
+    document.getElementById('closeHelpModal').addEventListener('click', () => helpModal.classList.add('hidden'));
+    document.getElementById('dismissHelpModal').addEventListener('click', () => helpModal.classList.add('hidden'));
+
+</script>
+</body>
+</html>

@@ -7,6 +7,7 @@ applications:
       JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 21.+}}'
       SPRING_PROFILES_ACTIVE: 'amqp1.0'
       SPRING_CLOUD_STREAM_BINDINGS_OUTPUT_DESTINATION: 'alerts.alert'
+      SPRING_CLOUD_STREAM_BINDINGS_OUTPUT_GROUP: 'alerts.alert'
       SOURCE_AMQP_FILTER_PROPERTY_NAME: 'account'
       SOURCE_AMQP_FILTER_PROPERTY_VALUE: ''
       CSV_FILE: ''

@@ -51,7 +51,7 @@ class RabbitAmqpConsumerConfig {
     private String activityFilterPropertyName;
 
 
-    @Value("${spring.cloud.stream.bindings.input.destination:amq.topic}")
+    @Value("${spring.cloud.stream.bindings.input.destination:alerts.alert}")
     private String alertExchange;
 
 

@@ -1,1 +1,674 @@
-Hello
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Data Flow & Alert Monitor</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Lucide Icons (optional utility) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            900: '#14532d',
+                        },
+                        node: {
+                            source: '#3b82f6',
+                            ai: '#8b5cf6',
+                            alert: '#ef4444'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'dash': 'dash 2s linear infinite'
+                    },
+                    keyframes: {
+                        dash: {
+                            'to': { 'stroke-dashoffset': '-24' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .flow-path {
+            stroke-dasharray: 8, 4;
+            animation: dash 1.5s linear infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans antialiased">
+
+<!-- Header / Controls Bar -->
+<header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 px-4 lg:px-8 py-3">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <!-- Brand Title -->
+        <div class="flex items-center space-x-3">
+            <div class="p-2 bg-indigo-600/20 rounded-lg border border-indigo-500/30 text-indigo-400">
+                <i class="fa-solid font-bold fa-diagram-project text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                    Data Flow Monitor
+                    <span id="liveStatusBadge" class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+                            <i class="fa-solid fa-circle text-[8px] mr-1 animate-pulse"></i> Live Pipeline
+                        </span>
+                </h1>
+                <p class="text-xs text-slate-400">AI Threat & Activity Monitoring Service</p>
+            </div>
+        </div>
+
+        <!-- Endpoint Configuration & Fetch Actions -->
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <div class="relative flex-1 sm:w-80">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 text-xs">
+                    <i class="fa-solid fa-link"></i>
+                </div>
+                <input type="text" id="endpointUrl"
+                       value="/alerts/ai/summary"
+                       class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-950 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                       placeholder="API Endpoint URL">
+            </div>
+            <button id="fetchBtn" onclick="fetchSummaryData()"
+                    class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5">
+                <i class="fa-solid fa-rotate" id="refreshIcon"></i>
+                <span>Fetch Data</span>
+            </button>
+            <div class="h-6 w-[1px] bg-slate-800 hidden sm:block"></div>
+            <button id="mockToggleBtn" onclick="toggleMockMode()"
+                    class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium rounded-lg transition flex items-center gap-1.5">
+                <i class="fa-solid fa-database text-amber-400"></i>
+                <span id="mockToggleText">Using Live Mode</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Main Container -->
+<main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-8 space-y-8">
+
+    <!-- Top Metrics Cards -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Activity Summary Card -->
+        <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5 flex items-center justify-between backdrop-blur shadow-sm hover:border-blue-500/30 transition">
+            <div class="space-y-1">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Activities</p>
+                <h3 class="text-3xl font-extrabold text-blue-400" id="metricActivityCount">0</h3>
+                <p class="text-[11px] text-slate-500">Ingested events from source</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 text-xl">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+        </div>
+
+        <!-- AI Processing Node Status -->
+        <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5 flex items-center justify-between backdrop-blur shadow-sm hover:border-purple-500/30 transition">
+            <div class="space-y-1">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">AI Processing Status</p>
+                <h3 class="text-xl font-bold text-purple-400 flex items-center gap-2">
+                    <span>Active Engine</span>
+                </h3>
+                <p class="text-[11px] text-slate-500" id="aiStatusSubtext">Analyzing events in real-time</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl">
+                <i class="fa-solid fa-brain"></i>
+            </div>
+        </div>
+
+        <!-- Alert Summary Card -->
+        <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5 flex items-center justify-between backdrop-blur shadow-sm hover:border-rose-500/30 transition">
+            <div class="space-y-1">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Alerts Generated</p>
+                <h3 class="text-3xl font-extrabold text-rose-400" id="metricAlertCount">0</h3>
+                <p class="text-[11px] text-slate-500">Threats/Anomalies flagged</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- DATA FLOW DIAGRAM SECTION -->
+    <section class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-route text-indigo-400"></i> Architecture & Data Flow Pipeline
+                </h2>
+                <p class="text-xs text-slate-400">Visual mapping of stream ingestion through the AI inference layer to alert outputs</p>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-400">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-500"></span> Source
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-purple-500 ml-2"></span> AI Layer
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-500 ml-2"></span> Alert
+            </div>
+        </div>
+
+        <!-- Diagram Container -->
+        <div id="diagramContainer" class="relative min-h-[280px] flex flex-col md:flex-row items-center justify-between gap-8 md:gap-4 py-8 px-2 md:px-8">
+
+            <!-- SVG Canvas for Connectors -->
+            <svg id="svgConnectors" class="absolute inset-0 w-full h-full pointer-events-none z-0 hidden md:block">
+                <defs>
+                    <!-- Arrowhead Blue -->
+                    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6"/>
+                    </marker>
+                    <!-- Arrowhead Rose -->
+                    <marker id="arrow-rose" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444"/>
+                    </marker>
+                    <!-- Gradients -->
+                    <linearGradient id="grad-source-ai" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#3b82f6" />
+                        <stop offset="100%" stop-color="#8b5cf6" />
+                    </linearGradient>
+                    <linearGradient id="grad-ai-alert" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#8b5cf6" />
+                        <stop offset="100%" stop-color="#ef4444" />
+                    </linearGradient>
+                </defs>
+
+                <!-- Arrow 1: Activities Source -> AI Processor -->
+                <path id="path1" d="M 0 0 L 0 0" stroke="url(#grad-source-ai)" stroke-width="3" fill="none" class="flow-path" marker-end="url(#arrow-blue)" />
+
+                <!-- Arrow 2: AI Processor -> Alert Box -->
+                <path id="path2" d="M 0 0 L 0 0" stroke="url(#grad-ai-alert)" stroke-width="3" fill="none" class="flow-path" marker-end="url(#arrow-rose)" />
+            </svg>
+
+            <!-- NODE 1: Activities Source -->
+            <div id="nodeSource" class="relative z-10 w-full md:w-72 bg-slate-950/90 border-2 border-blue-500/60 hover:border-blue-400 rounded-xl p-5 shadow-lg transition duration-300 group">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                            <i class="fa-solid fa-server text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white group-hover:text-blue-300 transition">Activities Source</h3>
+                            <p class="text-[11px] text-slate-400">Raw Event Ingestion</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-slate-400">Activity Count</span>
+                    <span class="text-sm font-extrabold text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/20" id="nodeActivityCount">0</span>
+                </div>
+
+                <!-- Glowing Effect -->
+                <div class="absolute -inset-0.5 bg-blue-500/10 rounded-xl blur-sm -z-10 group-hover:bg-blue-500/20 transition"></div>
+            </div>
+
+            <!-- Mobile Down Arrow 1 -->
+            <div class="block md:hidden text-blue-400 my-[-10px] z-10">
+                <i class="fa-solid fa-arrow-down text-xl animate-bounce"></i>
+            </div>
+
+            <!-- NODE 2: AI Processor -->
+            <div id="nodeAI" class="relative z-10 w-full md:w-72 bg-slate-950/90 border-2 border-purple-500/60 hover:border-purple-400 rounded-xl p-5 shadow-lg transition duration-300 group">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2.5 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                            <i class="fa-solid fa-microchip text-xl animate-pulse"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white group-hover:text-purple-300 transition">AI Processor</h3>
+                            <p class="text-[11px] text-slate-400">ML Threat Engine</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-slate-400">Processing Mode</span>
+                    <span class="text-xs font-semibold text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">Real-time LLM</span>
+                </div>
+
+                <!-- Glowing Effect -->
+                <div class="absolute -inset-0.5 bg-purple-500/10 rounded-xl blur-sm -z-10 group-hover:bg-purple-500/20 transition"></div>
+            </div>
+
+            <!-- Mobile Down Arrow 2 -->
+            <div class="block md:hidden text-rose-400 my-[-10px] z-10">
+                <i class="fa-solid fa-arrow-down text-xl animate-bounce"></i>
+            </div>
+
+            <!-- NODE 3: Alert Box -->
+            <div id="nodeAlert" class="relative z-10 w-full md:w-72 bg-slate-950/90 border-2 border-rose-500/60 hover:border-rose-400 rounded-xl p-5 shadow-lg transition duration-300 group">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2.5 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                            <i class="fa-solid fa-bell text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white group-hover:text-rose-300 transition">Alert Box</h3>
+                            <p class="text-[11px] text-slate-400">Security Notifications</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-slate-400">Alert Count</span>
+                    <span class="text-sm font-extrabold text-rose-400 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20" id="nodeAlertCount">0</span>
+                </div>
+
+                <!-- Glowing Effect -->
+                <div class="absolute -inset-0.5 bg-rose-500/10 rounded-xl blur-sm -z-10 group-hover:bg-rose-500/20 transition"></div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- DETAILED ALERT RECORDS CONTAINER -->
+    <section class="space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+            <div>
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-indigo-400"></i> Detailed Alert Records & Ingested Activities
+                </h2>
+                <p class="text-xs text-slate-400">Inspect nested payload payloads processed by the AI pipeline</p>
+            </div>
+            <div class="flex items-center gap-2">
+                    <span id="recordCountBadge" class="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
+                        0 Records Loaded
+                    </span>
+            </div>
+        </div>
+
+        <!-- Container where Alert Records Card items are injected -->
+        <div id="recordsListContainer" class="space-y-6">
+            <!-- Dynamic Content Will Be Rendered Here -->
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<footer class="border-t border-slate-800 bg-slate-900/50 py-6 mt-12 text-center text-xs text-slate-500">
+    <p>AI Data Flow & Alert Summary Visualizer &bull; Interconnected Event Pipeline</p>
+</footer>
+
+<!-- JAVASCRIPT LOGIC -->
+<script>
+    // Sample Mock Data structure matching user requirements exactly
+    const MOCK_DATA = {
+        "activityCount": 4,
+        "alertCount": 2,
+        "alertRecords": [
+            {
+                "activities": [
+                    {
+                        "id": "act-101",
+                        "account": "user.jdoe@company.com",
+                        "icon": "fa-user-shield",
+                        "time": "2026-10-19 14:02:11",
+                        "activity": "Multiple failed login attempts detected (5 tries in 30s)"
+                    },
+                    {
+                        "id": "act-102",
+                        "account": "user.jdoe@company.com",
+                        "icon": "fa-key",
+                        "time": "2026-10-19 14:02:45",
+                        "activity": "Password reset requested from unrecognized IP (192.168.1.105)"
+                    }
+                ],
+                "alerts": [
+                    {
+                        "id": "alt-901",
+                        "account": "user.jdoe@company.com",
+                        "level": "warning",
+                        "time": "2026-10-19 14:03:00",
+                        "event": "Suspicious Login Behavior - Possible Brute Force Attempt"
+                    }
+                ]
+            },
+            {
+                "activities": [
+                    {
+                        "id": "act-103",
+                        "account": "service-admin@cloud.local",
+                        "icon": "fa-database",
+                        "time": "2026-10-19 14:05:22",
+                        "activity": "Bulk export request issued on DB Table: 'Customer_Credentials'"
+                    },
+                    {
+                        "id": "act-104",
+                        "account": "service-admin@cloud.local",
+                        "icon": "fa-network-wired",
+                        "time": "2026-10-19 14:05:50",
+                        "activity": "Outbound data transfer spike detected (2.4 GB to external host)"
+                    }
+                ],
+                "alerts": [
+                    {
+                        "id": "alt-902",
+                        "account": "service-admin@cloud.local",
+                        "level": "critical",
+                        "time": "2026-10-19 14:06:15",
+                        "event": "Data Exfiltration Threat Flagged by Anomaly Model"
+                    }
+                ]
+            }
+        ]
+    };
+
+    // Application State
+    let isMockMode = false;
+    let currentData = null;
+
+    // On Page Load
+    window.addEventListener('DOMContentLoaded', () => {
+        fetchSummaryData();
+
+        // Recalculate SVG arrows on window resize
+        window.addEventListener('resize', updateSvgConnectors);
+    });
+
+    // Main Fetch Function
+    async function fetchSummaryData() {
+        const endpointInput = document.getElementById('endpointUrl').value.trim();
+        const refreshIcon = document.getElementById('refreshIcon');
+
+        // Animation for refresh button
+        refreshIcon.classList.add('fa-spin');
+
+        if (isMockMode) {
+            // Mock Mode active
+            setTimeout(() => {
+                currentData = MOCK_DATA;
+                renderDashboard(currentData);
+                refreshIcon.classList.remove('fa-spin');
+            }, 300);
+            return;
+        }
+
+        try {
+            // Attempt fetching from actual endpoint
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5s timeout fallback
+
+            const response = await fetch(endpointInput, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' },
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                throw new Error(`HTTP Error Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            currentData = data;
+            updateLiveStatus(true, "Live Server Connected");
+            renderDashboard(data);
+
+        } catch (err) {
+            console.warn('Live fetch failed or timed out. Switching to fallback mock data for smooth UI display:', err.message);
+
+            // Fallback to mock data on error/offline
+            currentData = MOCK_DATA;
+            updateLiveStatus(false, "Fallback Data (Server Offline)");
+            renderDashboard(currentData);
+        } finally {
+            refreshIcon.classList.remove('fa-spin');
+        }
+    }
+
+    // Toggle Mock Mode Manually
+    function toggleMockMode() {
+        isMockMode = !isMockMode;
+        const btnText = document.getElementById('mockToggleText');
+
+        if (isMockMode) {
+            btnText.textContent = "Using Mock Data";
+            updateLiveStatus(false, "Mock Mode Active");
+        } else {
+            btnText.textContent = "Using Live Mode";
+            updateLiveStatus(true, "Live Pipeline Target");
+        }
+        fetchSummaryData();
+    }
+
+    // Update Header Status Indicator
+    function updateLiveStatus(isLive, message) {
+        const badge = document.getElementById('liveStatusBadge');
+        if (isLive && !isMockMode) {
+            badge.className = "text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium";
+            badge.innerHTML = `<i class="fa-solid fa-circle text-[8px] mr-1 animate-pulse"></i> ${message}`;
+        } else {
+            badge.className = "text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium";
+            badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-[10px] mr-1"></i> ${message}`;
+        }
+    }
+
+    // Render UI Elements
+    function renderDashboard(data) {
+        // Safe fallbacks for values
+        const activityCount = data?.activityCount ?? 0;
+        const alertCount = data?.alertCount ?? 0;
+        const records = data?.alertRecords ?? [];
+
+        // 1. Update Metrics Cards & Node Badges
+        document.getElementById('metricActivityCount').textContent = activityCount;
+        document.getElementById('metricAlertCount').textContent = alertCount;
+        document.getElementById('nodeActivityCount').textContent = activityCount;
+        document.getElementById('nodeAlertCount').textContent = alertCount;
+
+        // 2. Render SVG connectors between diagram boxes
+        setTimeout(updateSvgConnectors, 50);
+
+        // 3. Render Alert Records List
+        renderAlertRecords(records);
+    }
+
+    // Draw and update SVG arrows linking nodes dynamically
+    function updateSvgConnectors() {
+        const svg = document.getElementById('svgConnectors');
+        const nodeSource = document.getElementById('nodeSource');
+        const nodeAI = document.getElementById('nodeAI');
+        const nodeAlert = document.getElementById('nodeAlert');
+
+        // Hide on mobile screens where flex column layout is used
+        if (window.innerWidth < 768) {
+            return;
+        }
+
+        const containerRect = document.getElementById('diagramContainer').getBoundingClientRect();
+
+        const r1 = nodeSource.getBoundingClientRect();
+        const r2 = nodeAI.getBoundingClientRect();
+        const r3 = nodeAlert.getBoundingClientRect();
+
+        // Calculate anchor points (Center Right to Center Left)
+        const p1Start = { x: r1.right - containerRect.left, y: r1.top + r1.height / 2 - containerRect.top };
+        const p1End   = { x: r2.left - containerRect.left, y: r2.top + r2.height / 2 - containerRect.top };
+
+        const p2Start = { x: r2.right - containerRect.left, y: r2.top + r2.height / 2 - containerRect.top };
+        const p2End   = { x: r3.left - containerRect.left, y: r3.top + r3.height / 2 - containerRect.top };
+
+        // Update SVG Path Attributes with slight padding for arrow markers
+        const path1 = document.getElementById('path1');
+        const path2 = document.getElementById('path2');
+
+        path1.setAttribute('d', `M ${p1Start.x} ${p1Start.y} L ${p1End.x - 8} ${p1End.y}`);
+        path2.setAttribute('d', `M ${p2Start.x} ${p2Start.y} L ${p2End.x - 8} ${p2End.y}`);
+    }
+
+    // Render List of Alert Records & Nested Tables/Items
+    function renderAlertRecords(records) {
+        const container = document.getElementById('recordsListContainer');
+        const recordBadge = document.getElementById('recordCountBadge');
+
+        recordBadge.textContent = `${records.length} Record Batch${records.length === 1 ? '' : 'es'}`;
+        container.innerHTML = '';
+
+        if (!records || records.length === 0) {
+            container.innerHTML = `
+                    <div class="p-8 text-center bg-slate-900/40 border border-slate-800 rounded-xl text-slate-500">
+                        <i class="fa-solid fa-inbox text-3xl mb-2"></i>
+                        <p class="text-sm">No alert records available in current payload.</p>
+                    </div>
+                `;
+            return;
+        }
+
+        records.forEach((record, index) => {
+            const card = document.createElement('div');
+            card.className = "bg-slate-900/80 border border-slate-800 rounded-xl overflow-hidden shadow-lg transition hover:border-slate-700";
+
+            const activities = record.activities || [];
+            const alerts = record.alerts || [];
+
+            card.innerHTML = `
+                    <div class="bg-slate-800/50 px-5 py-3 border-b border-slate-800 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 text-xs flex items-center justify-center font-bold">
+                                ${index + 1}
+                            </span>
+                            <h3 class="text-xs font-semibold text-slate-200">Alert Record Set #${index + 1}</h3>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs text-slate-400">
+                            <span><i class="fa-solid fa-bolt text-blue-400 mr-1"></i>${activities.length} Activities</span>
+                            <span><i class="fa-solid fa-triangle-exclamation text-rose-400 mr-1"></i>${alerts.length} Alerts</span>
+                        </div>
+                    </div>
+
+                    <div class="p-5 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        <!-- Column 1: Activities List -->
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-list-ul"></i> Associated Activities
+                                </h4>
+                            </div>
+
+                            <div class="space-y-2">
+                                ${activities.length === 0
+                ? '<p class="text-xs text-slate-500 italic">No activity details attached.</p>'
+                : activities.map(act => `
+                                        <div class="bg-slate-950/60 border border-slate-800/80 rounded-lg p-3 hover:border-blue-500/30 transition text-xs space-y-1">
+                                            <div class="flex items-center justify-between">
+                                                <span class="font-semibold text-slate-200 flex items-center gap-1.5">
+                                                    <i class="fa-solid ${getIconClass(act.icon)} text-blue-400"></i>
+                                                    ${escapeHtml(act.account || 'Unknown Account')}
+                                                </span>
+                                                <span class="text-[10px] text-slate-500 font-mono">${escapeHtml(act.time || '')}</span>
+                                            </div>
+                                            <p class="text-slate-300 pl-5">${escapeHtml(act.activity || '')}</p>
+                                            <div class="pl-5 text-[10px] text-slate-500 font-mono">ID: ${escapeHtml(act.id || 'N/A')}</div>
+                                        </div>
+                                    `).join('')
+            }
+                            </div>
+                        </div>
+
+                        <!-- Column 2: Alerts List -->
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-bell"></i> Triggered Alerts
+                                </h4>
+                            </div>
+
+                            <div class="space-y-2">
+                                ${alerts.length === 0
+                ? '<p class="text-xs text-slate-500 italic">No alerts generated for this record.</p>'
+                : alerts.map(alt => {
+                    const badgeStyle = getAlertBadgeStyle(alt.level);
+                    return `
+                                            <div class="bg-slate-950/60 border border-slate-800/80 rounded-lg p-3 hover:border-rose-500/30 transition text-xs space-y-1">
+                                                <div class="flex items-center justify-between">
+                                                    <span class="font-semibold text-slate-200 flex items-center gap-1.5">
+                                                        <i class="fa-solid fa-user text-slate-400"></i>
+                                                        ${escapeHtml(alt.account || 'System')}
+                                                    </span>
+                                                    <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded ${badgeStyle}">
+                                                        ${escapeHtml(alt.level || 'INFO')}
+                                                    </span>
+                                                </div>
+                                                <p class="text-slate-200 font-medium">${escapeHtml(alt.event || '')}</p>
+                                                <div class="flex items-center justify-between text-[10px] text-slate-500 font-mono pt-1">
+                                                    <span>ID: ${escapeHtml(alt.id || 'N/A')}</span>
+                                                    <span>${escapeHtml(alt.time || '')}</span>
+                                                </div>
+                                            </div>
+                                        `;
+                }).join('')
+            }
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+            container.appendChild(card);
+        });
+    }
+
+    // Helper: Alert Severity Styling
+    function getAlertBadgeStyle(level = '') {
+        const lvl = level.toLowerCase();
+        if (lvl === 'critical' || lvl === 'high') {
+            return 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        } else if (lvl === 'warning' || lvl === 'medium') {
+            return 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
+        } else {
+            return 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
+        }
+    }
+
+    // Helper: Sanitize/Validate font-awesome icon name
+    function getIconClass(iconStr) {
+        if (!iconStr) return 'fa-circle-dot';
+        if (iconStr.startsWith('fa-')) return iconStr;
+        return `fa-${iconStr}`;
+    }
+
+    // Helper: Escape HTML strings
+    function escapeHtml(str) {
+        if (typeof str !== 'string') return str;
+        return str.replace(/[&<>"']/g, function(m) {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[m];
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,8 +1,10 @@
 package io.cloudNativeData.alarm.ai.source.service;
 
+import io.cloudNativeData.alarm.ai.source.domains.AlertRecord;
 import io.cloudNativeData.alarm.ai.source.domains.ProcessSummary;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
+import nyla.solutions.core.data.collections.CapacityList;
 import nyla.solutions.core.patterns.repository.memory.ListRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,19 +29,27 @@ public class InMemoryAlDetectorService implements AlertDetectorService{
     private final AlertsModelInference modelInference;
     private final int batchCount;
     private final long delayMs;
+
     private Long lastCheckTime = null;
-    private final ProcessSummary summary = new ProcessSummary();
+    private final ProcessSummary summary;
 
     public InMemoryAlDetectorService(ListRepository<Activity> activityRepository,
                                      AlertsModelInference modelInference,
                                      @Value("${alerts.inference.batch}")
                                      int batchCount,
                                      @Value("${alerts.inference.delayMs}")
-                                     long delayMs) {
+                                     long delayMs,
+                                     @Value("${alerts.max.records:20}")
+                                     int maxAlertsRecordsCount) {
         this.activityRepository = activityRepository;
         this.modelInference = modelInference;
         this.batchCount = batchCount;
         this.delayMs = delayMs;
+        summary = ProcessSummary.builder()
+                .activityCount(0L)
+                .alertCount(0L)
+                .alertRecords(new CapacityList<>(maxAlertsRecordsCount))
+                .build();
     }
 
     /**
@@ -62,6 +72,14 @@ public class InMemoryAlDetectorService implements AlertDetectorService{
         var detectedAlerts = checkForAlerts();
 
         if(detectedAlerts != null && !detectedAlerts.isEmpty()){
+
+            var activities = (List<Activity>) activityRepository.findAll();
+
+            summary.getAlertRecords().add(AlertRecord.builder()
+                            .activities(activities)
+                            .alerts(detectedAlerts)
+                    .build());
+
             summary.setAlertCount(summary.getAlertCount()+detectedAlerts.size());
         }
 

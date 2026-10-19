@@ -32,11 +32,13 @@ class InMemoryAlDetectorServiceTest {
     private AlertsModelInference alertsModelinference;
     private final Alert alert = JavaBeanGeneratorCreator.of(Alert.class).create();
     private final static long delayMs = 1000*60;
+    private final static int maxAlertCount = 100;
 
     @BeforeEach
     void setUp() {
 
-        subject = new InMemoryAlDetectorService(activityRepository, alertsModelinference,1,delayMs);
+        subject = new InMemoryAlDetectorService(activityRepository, alertsModelinference,1,delayMs,
+                maxAlertCount);
     }
 
     @Test
@@ -52,7 +54,7 @@ class InMemoryAlDetectorServiceTest {
     }
 
     @Test
-    void given_hasDetected_Alert_increaseAlertCount() {
+    void given_hasDetected_Alert_summaryHasAlerts() {
 
         List<Alert> expected = List.of(alert,alert);
         var activities = List.of(activity,activity);
@@ -68,12 +70,13 @@ class InMemoryAlDetectorServiceTest {
         var after = subject.summarize();
 
         assertThat(before.getAlertCount()).isEqualTo(expected.size());
+        assertThat(after.getAlertRecords()).hasSize(1);
     }
 
     @Test
     void givenHashMoreThanMin_when_detectAlerts_Then_Call() {
 
-        subject = new InMemoryAlDetectorService(activityRepository, alertsModelinference,1,delayMs);
+        subject = new InMemoryAlDetectorService(activityRepository, alertsModelinference,1,delayMs,maxAlertCount);
 
         List<Alert> expected = List.of(alert);
         var activities = List.of(activity,activity);
@@ -88,9 +91,9 @@ class InMemoryAlDetectorServiceTest {
     }
 
     @Test
-    void givenHashLessThanMin_when_detectAlerts_Then_DoNotInfernece() {
+    void givenHashLessThanMin_when_detectAlerts_Then_DoNotInference() {
 
-        subject = new InMemoryAlDetectorService(activityRepository, alertsModelinference,10,delayMs);
+        subject = new InMemoryAlDetectorService(activityRepository, alertsModelinference,10,delayMs,maxAlertCount);
 
         List<Alert> expected = List.of(alert);
         var activities = List.of(activity,activity);
@@ -109,7 +112,6 @@ class InMemoryAlDetectorServiceTest {
     void given_activities_with_alert_when_checkAlerts_then_Sends_Alerts() {
 
         int batchCount = 2;
-        subject = new InMemoryAlDetectorService(activityRepository, alertsModelinference,batchCount,delayMs);
 
         List<Activity> activities = List.of(activity,activity,activity);
         when(activityRepository.findAll()).thenReturn(activities);
@@ -128,7 +130,6 @@ class InMemoryAlDetectorServiceTest {
 
         int batchCount = 2;
         long delayMs = 10;
-        subject = new InMemoryAlDetectorService(activityRepository, alertsModelinference,batchCount,delayMs);
         when(activityRepository.findAll())
                 .thenReturn(List.of(activity))
                 .thenReturn(List.of(activity,activity));

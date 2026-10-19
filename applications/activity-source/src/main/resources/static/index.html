@@ -94,7 +94,7 @@
         <div class="lg:col-span-7 space-y-6">
 
             <!-- Target API Endpoint Settings Card -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm transition-all"  style="display: none;">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm transition-all" style="display: none;">
                 <div class="flex items-center justify-between mb-3">
                     <label for="endpointUrl" class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
                         <i class="fa-solid fa-server text-blue-500"></i> Target Endpoint URL
@@ -144,7 +144,7 @@
                                 Activity ID
                             </label>
                             <div class="flex gap-2">
-                                <input type="text" id="idInput" value="01" required
+                                <input type="text" id="idInput" value="01"
                                        class="flex-1 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none transition" />
                                 <button type="button" id="nextIdBtn" title="Increment ID (+1)" class="px-3 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition flex items-center gap-1 shrink-0">
                                     <i class="fa-solid fa-plus"></i>
@@ -186,6 +186,7 @@
                                     <option value="fa-wallet">fa-wallet</option>
                                     <option value="fa-piggy-bank">fa-piggy-bank</option>
                                     <option value="fa-snowflake">fa-snowflake (Freeze)</option>
+                                    <option value="fa-temperature-low">fa-temperature-low</option>
                                 </optgroup>
                                 <optgroup label="Security & Auth">
                                     <option value="fa-key">fa-key</option>
@@ -236,11 +237,18 @@
                                   class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none transition">Wire transfer of amount above threshold</textarea>
                     </div>
 
-                    <!-- Submit Button -->
-                    <button type="submit" id="submitBtn" class="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 active:scale-[0.99] transition duration-200 flex items-center justify-center gap-2">
-                        <i id="submitIcon" class="fa-solid fa-paper-plane"></i>
-                        <span id="submitText">Post Activity Event</span>
-                    </button>
+                    <!-- Submit & Simulate Action Buttons -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        <button type="submit" id="submitBtn" class="py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 active:scale-[0.99] transition duration-200 flex items-center justify-center gap-2">
+                            <i id="submitIcon" class="fa-solid fa-paper-plane"></i>
+                            <span id="submitText">Post Activity Event</span>
+                        </button>
+
+                        <button type="button" id="simulateFraudBtn" class="py-3.5 px-4 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white font-semibold rounded-xl shadow-lg shadow-rose-500/25 active:scale-[0.99] transition duration-200 flex items-center justify-center gap-2">
+                            <i id="simulateFraudIcon" class="fa-solid fa-shield-cat"></i>
+                            <span id="simulateFraudText">Simulate Fraud</span>
+                        </button>
+                    </div>
 
                 </form>
 
@@ -252,7 +260,7 @@
         <div class="lg:col-span-5 space-y-6">
 
             <!-- Live Payload Preview Card -->
-            <div class="bg-slate-900 text-slate-100 rounded-2xl p-5 border border-slate-800 shadow-lg space-y-4"  style="display: none;">
+            <div class="bg-slate-900 text-slate-100 rounded-2xl p-5 border border-slate-800 shadow-lg space-y-4" style="display: none;">
                 <div class="flex items-center justify-between pb-3 border-b border-slate-800">
             <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
               <i class="fa-solid fa-code text-emerald-400"></i> Live Request Payload
@@ -314,6 +322,17 @@
 
 <!-- JavaScript App Logic -->
 <script>
+    // Fraud Activities List to simulate
+    const FRAUD_ACTIVITIES = [
+        { "id" : "70", "icon" : "fa-credit-card", "account" : "josiah", "time" : "07:15 PM", "activity" : "type: SALE, pan: 4111XXXXXX1111, amount: 100.00, date: 1-7-2026 19:12:34 terminal_id: TERM_88291, merchant_id: MERCH_55432" },
+        { "id" : "71", "icon" : "fa-credit-card", "account" : "josiah", "time" : "07:17 PM", "activity" : "type: SALE, pan: 4111XXXXXX1111, amount: 1000.01, date: '1-7-2026 19:17:32' terminal_id: TERM_88291, merchant_id: MERCH_5555" },
+        { "id" : "72", "icon" : "fa-temperature-low", "account" : "josiah", "time" : "07:19 PM", "activity" : "type: SALE, pan: 4111XXXXXX1111, amount: 1.01, date: '1-7-2026 19:19:32' terminal_id: TERM_88291, merchant_id: MERCH_55432" },
+        { "id" : "73", "icon" : "fa-credit-card", "account" : "josiah", "time" : "07:17 PM", "activity" : "type: SALE, pan: 4111XXXXXX1111, amount: 0.01, date: '1-7-2026 19:17:32' terminal_id: TERM_88291, merchant_id: MERCH_55432" },
+        { "id" : "74", "icon" : "fa-credit-card", "account" : "josiah", "time" : "07:19 PM", "activity" : "type: SALE, pan: 4111XXXXXX1111, amount: 1.01, date: '1-7-2026 19:19:32' terminal_id: TERM_88291, merchant_id: MERCH_55432" },
+        { "id" : "75", "icon" : "fa-credit-card", "account" : "josiah", "time" : "07:20 PM", "activity" : "type: SALE, pan: 4111XXXXXX1111, amount: 5.01, date: '1-7-2026 19:20:32' terminal_id: TERM_88291, merchant_id: MERCH_5555" },
+        { "id" : "76", "icon" : "fa-credit-card", "account" : "josiah", "time" : "07:15 PM", "activity" : "type: SALE, pan: 4111XXXXXX1111, amount: 100.00, date: '1-7-2026 19:12:34' terminal_id: TERM_88291, merchant_id: MERCH_55432" }
+    ];
+
     // Preset Data Store
     const PRESETS = {
         wire_transfer: {
@@ -392,6 +411,10 @@
     const submitBtn = document.getElementById('submitBtn');
     const submitIcon = document.getElementById('submitIcon');
     const submitText = document.getElementById('submitText');
+
+    const simulateFraudBtn = document.getElementById('simulateFraudBtn');
+    const simulateFraudIcon = document.getElementById('simulateFraudIcon');
+    const simulateFraudText = document.getElementById('simulateFraudText');
 
     const responseEmptyState = document.getElementById('responseEmptyState');
     const responseContent = document.getElementById('responseContent');
@@ -528,80 +551,144 @@
         showToast("JSON Payload copied to clipboard", "info");
     });
 
+    // --- Helper function to send single POST payload ---
+    async function postSingleActivity(payload) {
+        const targetUrl = endpointUrlInput.value;
+        const response = await fetch(targetUrl, {
+            method: 'POST',
+            headers: {
+                'accept': '*/*',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const rawText = await response.text();
+        let formattedText = rawText;
+        try {
+            const parsed = JSON.parse(rawText);
+            formattedText = JSON.stringify(parsed, null, 2);
+        } catch (_) {}
+
+        return { response, rawText: formattedText, targetUrl };
+    }
+
+    // Render Response UI
+    function renderTelemetryResponse(response, rawText, targetUrl) {
+        responseEmptyState.classList.add('hidden');
+        responseContent.classList.remove('hidden');
+        corsHint.classList.add('hidden');
+        statusBadge.classList.remove('hidden');
+
+        if (response.ok) {
+            statusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800';
+            statusBadge.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> ${response.status} ${response.statusText || 'OK'}`;
+            responseBody.textContent = rawText || '(Empty 200 OK Response)';
+        } else {
+            statusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-bold bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800';
+            statusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> HTTP ${response.status}`;
+            responseBody.textContent = rawText || `Error ${response.status}: ${response.statusText}`;
+        }
+    }
+
+    function renderTelemetryError(err, targetUrl) {
+        responseEmptyState.classList.add('hidden');
+        responseContent.classList.remove('hidden');
+        statusBadge.classList.remove('hidden');
+
+        statusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-bold bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800';
+        statusBadge.innerHTML = `<i class="fa-solid fa-plug-circle-xmark mr-1"></i> Connection Failed`;
+
+        responseBody.textContent = `Fetch Error: ${err.message}`;
+        corsUrlHint.textContent = targetUrl;
+        corsHint.classList.remove('hidden');
+    }
+
     // --- 8. Form Submission via Fetch ---
     activityForm.addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        const targetUrl = endpointUrlInput.value;
         const payload = getPayloadObject();
 
         // Set Loading UI State
         submitBtn.disabled = true;
+        simulateFraudBtn.disabled = true;
         submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
         submitIcon.className = 'fa-solid fa-spinner fa-spin';
         submitText.textContent = 'Posting Event...';
 
         try {
-            const response = await fetch(targetUrl, {
-                method: 'POST',
-                headers: {
-                    'accept': '*/*',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
+            const { response, rawText, targetUrl } = await postSingleActivity(payload);
+            renderTelemetryResponse(response, rawText, targetUrl);
 
-            const rawText = await response.text();
-            let formattedText = rawText;
-            try {
-                const parsed = JSON.parse(rawText);
-                formattedText = JSON.stringify(parsed, null, 2);
-            } catch (_) {
-                // Keep as plain text if not JSON
-            }
-
-            // Render Telemetry
-            responseEmptyState.classList.add('hidden');
-            responseContent.classList.remove('hidden');
-            corsHint.classList.add('hidden');
-
-            statusBadge.classList.remove('hidden');
             if (response.ok) {
-                statusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800';
-                statusBadge.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> ${response.status} ${response.statusText || 'OK'}`;
-                responseBody.textContent = formattedText || '(Empty 200 OK Response)';
                 showToast("Activity successfully posted!", "success");
             } else {
-                statusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-bold bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800';
-                statusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> HTTP ${response.status}`;
-                responseBody.textContent = formattedText || `Error ${response.status}: ${response.statusText}`;
                 showToast(`Server returned status ${response.status}`, "error");
             }
-
         } catch (err) {
-            // Network / CORS Failure
-            responseEmptyState.classList.add('hidden');
-            responseContent.classList.remove('hidden');
-
-            statusBadge.classList.remove('hidden');
-            statusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-bold bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800';
-            statusBadge.innerHTML = `<i class="fa-solid fa-plug-circle-xmark mr-1"></i> Connection Failed`;
-
-            responseBody.textContent = `Fetch Error: ${err.message}`;
-            corsUrlHint.textContent = targetUrl;
-            corsHint.classList.remove('hidden');
-
+            renderTelemetryError(err, endpointUrlInput.value);
             showToast("Request failed. Check local server connection.", "error");
         } finally {
-            // Restore Submit Button State
+            // Restore Buttons State
             submitBtn.disabled = false;
+            simulateFraudBtn.disabled = false;
             submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
             submitIcon.className = 'fa-solid fa-paper-plane';
             submitText.textContent = 'Post Activity Event';
         }
     });
 
-    // --- 9. Toast Notification System ---
+    // --- 9. Simulate Fraud Button Handler ---
+    simulateFraudBtn.addEventListener('click', async function() {
+        submitBtn.disabled = true;
+        simulateFraudBtn.disabled = true;
+        simulateFraudBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        simulateFraudIcon.className = 'fa-solid fa-spinner fa-spin';
+        simulateFraudText.textContent = 'Simulating...';
+
+        showToast(`Starting fraud simulation (${FRAUD_ACTIVITIES.length} events)...`, "info");
+
+        let successCount = 0;
+        let logs = [];
+
+        for (let i = 0; i < FRAUD_ACTIVITIES.length; i++) {
+            const fraudPayload = FRAUD_ACTIVITIES[i];
+            try {
+                const { response, rawText } = await postSingleActivity(fraudPayload);
+
+                if (response.ok) {
+                    successCount++;
+                    logs.push(`[${i+1}/${FRAUD_ACTIVITIES.length}] ID ${fraudPayload.id}: SUCCESS (${response.status})`);
+                } else {
+                    logs.push(`[${i+1}/${FRAUD_ACTIVITIES.length}] ID ${fraudPayload.id}: FAILED (HTTP ${response.status})`);
+                }
+
+                renderTelemetryResponse(response, `Batch Output Log:\n` + logs.join('\n') + `\n\nLatest Raw Response:\n${rawText}`, endpointUrlInput.value);
+            } catch (err) {
+                logs.push(`[${i+1}/${FRAUD_ACTIVITIES.length}] ID ${fraudPayload.id}: FETCH ERROR (${err.message})`);
+                renderTelemetryError(err, endpointUrlInput.value);
+                responseBody.textContent = `Batch Output Log:\n` + logs.join('\n') + `\n\n${responseBody.textContent}`;
+            }
+
+            // Short pause between sequential POSTs for visual telemetry tracking
+            await new Promise(resolve => setTimeout(resolve, 300));
+        }
+
+        if (successCount === FRAUD_ACTIVITIES.length) {
+            showToast(`Fraud simulation complete! All ${FRAUD_ACTIVITIES.length} events posted.`, "success");
+        } else {
+            showToast(`Fraud simulation finished: ${successCount}/${FRAUD_ACTIVITIES.length} succeeded.`, "error");
+        }
+
+        submitBtn.disabled = false;
+        simulateFraudBtn.disabled = false;
+        simulateFraudBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+        simulateFraudIcon.className = 'fa-solid fa-shield-cat';
+        simulateFraudText.textContent = 'Simulate Fraud';
+    });
+
+    // --- 10. Toast Notification System ---
     function showToast(message, type = "info") {
         const toast = document.createElement('div');
         toast.className = `pointer-events-auto flex items-center gap-3 p-3.5 rounded-xl shadow-xl text-xs font-semibold border transition-all duration-300 transform translate-y-2 opacity-0`;

@@ -4,11 +4,13 @@ import com.rabbitmq.stream.Environment;
 import com.rabbitmq.stream.OffsetSpecification;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.MessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.function.context.config.JsonMessageConverter;
 import org.springframework.cloud.function.json.JacksonMapper;
+import org.springframework.cloud.stream.config.ListenerContainerCustomizer;
 import org.springframework.cloud.stream.config.ProducerMessageHandlerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +39,28 @@ public class RabbitConfig {
 
 
     @Bean
+    ListenerContainerCustomizer<MessageListenerContainer> customizer() {
+        return (cont, dest, group) -> {
+            StreamListenerContainer container = (StreamListenerContainer) cont;
+            container.setConsumerCustomizer((name, builder) -> {
+                builder.filter().values(filterValue)
+                        .postFilter( message ->
+                                {
+                                    log.info("******* CALLED YEAH!!! ********");
+                                    return filterValue.equals(message
+                                            .getApplicationProperties()
+                                            .get(filterPropName));
+                                }
+
+                        );
+
+                builder.offset(OffsetSpecification.first());
+            });
+            // ...
+        };
+    }
+/*
+    @Bean
     RabbitListenerContainerFactory<StreamListenerContainer> nativeFactory(Environment env) {
         StreamRabbitListenerContainerFactory factory = new StreamRabbitListenerContainerFactory(env);
         factory.setNativeListener(true);
@@ -56,33 +80,7 @@ public class RabbitConfig {
         });
         return factory;
     }
-
-//    @Bean
-//    ListenerContainerCustomizer<MessageListenerContainer> customizer() {
-//        return (cont, dest, group) -> {
-//            if(cont instanceof StreamListenerContainer container)
-//            {
-//                //set filter
-//                container.setConsumerCustomizer((name, builder) -> {
-//
-//                    log.info("Filtering consumer with value: {}",filterValue);
-//                    builder.noTrackingStrategy()
-//                            .filter().values(filterValue)
-//                                    .postFilter( message ->
-//                                            {
-//                                                return filterValue.equals(message
-//                                                        .getApplicationProperties()
-//                                                        .get(filterPropName));
-//                                            }
-//
-//                                            );
-//
-//                    builder.offset(OffsetSpecification.first());
-//
-//                });
-//            }
-//        };
-//    }
+*/
 
     @Bean
     org.springframework.messaging.converter.MessageConverter messageConverter(JsonMapper objectMapper)

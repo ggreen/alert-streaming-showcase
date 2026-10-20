@@ -14,7 +14,9 @@ import showcase.streaming.domains.Alert;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
@@ -26,110 +28,75 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class InMemoryAlDetectorService implements AlertDetectorService{
+public class InMemoryAlDetectorService implements AlertDetectorService {
     private final ListRepository<Activity> activityRepository;
     private final AlertsModelInference modelInference;
     private final int batchCount;
-    private final long delayMs;
-
-    private Long lastCheckTime = null;
     private final ProcessSummary summary;
-    private List<Activity> activitiesMemento;
+    private final AtomicLong activityCount = new AtomicLong(0);
+    private final AtomicLong alertCount = new AtomicLong(0);
+    private final AtomicLong lastCheckTime = new AtomicLong(System.currentTimeMillis());
 
     public InMemoryAlDetectorService(ListRepository<Activity> activityRepository,
                                      AlertsModelInference modelInference,
-                                     @Value("${alerts.inference.batch}")
-                                     int batchCount,
-                                     @Value("${alerts.inference.delayMs}")
-                                     long delayMs,
-                                     @Value("${alerts.max.records:20}")
-                                     int maxAlertsRecordsCount) {
+                                     @Value("${alerts.inference.batch}") int batchCount,
+                                     @Value("${alerts.inference.delayMs}") long delayMs,
+                                     @Value("${alerts.max.records:20}") int maxAlertsRecordsCount) {
         this.activityRepository = activityRepository;
         this.modelInference = modelInference;
         this.batchCount = batchCount;
-        this.delayMs = delayMs;
-        summary = ProcessSummary.builder()
+        this.summary = ProcessSummary.builder()
                 .activityCount(0L)
                 .alertCount(0L)
                 .alertRecords(new CapacityList<>(maxAlertsRecordsCount))
                 .build();
     }
 
-    /**
-     * Save to the repository and determine alerts
-     * based on recent activities.
-     *
-     * @param activity the current activity
-     * @return the list of alerts
-     */
     @Override
-    public List<Alert> detectAlerts(Activity activity) {
-        log.info("Saving activity: {}",activity);
-
+    public synchronized List<Alert> detectAlerts(Activity activity) {
+        log.info("Saving activity: {}", activity);
         activityRepository.save(activity);
+        summary.setActivityCount(activityCount.incrementAndGet());
 
-        summary.setActivityCount(summary.getActivityCount()+1);
-
-        log.info("Detecting alerts for activity: {}",activity);
-
-        var detectedAlerts = checkForAlerts();
-
-        if(detectedAlerts != null && !detectedAlerts.isEmpty()){
-
-
-            summary.getAlertRecords().add(AlertRecord.builder()
-                            .activities( activitiesMemento)
-                            .alerts(detectedAlerts)
-                    .build());
-
-            summary.setAlertCount(summary.getAlertCount()+detectedAlerts.size());
-        }
-
-        log.info("summary: {}",summary);
-        return detectedAlerts;
+        log.info("Detecting alerts for activity: {}", activity);
+        return checkForAlerts();
     }
 
-//    @Override
     public synchronized List<Alert> checkForAlerts() {
-        long currentTime= System.currentTimeMillis();
-        var activities = (List<Activity>) activityRepository.findAll();
-        log.info("Checking if activities size:{} > {} (min batch size) or currentTime - {}: lastCheckTime > {}: delayMs",
-                activities.size(),batchCount,lastCheckTime,delayMs);
+        var activities = new ArrayList<>((Collection<Activity>) activityRepository.findAll());
 
-        try{
-            if(activities.size() > batchCount ||
-                    (lastCheckTime!=null && (currentTime - lastCheckTime) > delayMs))
-            {
-                return getAlerts(activities);
-            }
+        if (activities.isEmpty()) {
+            return null;
         }
-        finally {
-            lastCheckTime = System.currentTimeMillis();
+
+        boolean batchThresholdMet = activities.size() >= batchCount;
+
+        if (batchThresholdMet ) {
+            return processAlerts(activities);
         }
 
         return null;
     }
 
-    @Override
-    public ProcessSummary summarize() {
-        return this.summary;
-    }
-
-    @Nullable
-    private List<Alert> getAlerts(List<Activity> activities) {
-
-        activitiesMemento = activities;
-
+    private List<Alert> processAlerts(List<Activity> activities) {
         var alerts = this.modelInference.determineAlert(activities);
 
-        if(alerts != null && !alerts.isEmpty())
-        {
-            log.info("Deleting activities from repository");
-
-
+        if (alerts != null && !alerts.isEmpty()) {
             activityRepository.deleteAll();
+
+            summary.getAlertRecords().add(AlertRecord.builder()
+                    .activities(activities) // Defensive copy preserved
+                    .alerts(alerts)
+                    .build());
+
+            summary.setAlertCount(alertCount.addAndGet(alerts.size()));
         }
 
         return alerts;
+    }
+
+    @Override
+    public ProcessSummary summarize() {
+        return this.summary;
     }
 }

@@ -45,7 +45,7 @@ class RabbitAmqpConsumerConfig {
     private String alertFilterValue;
 
     @Value("${stream.activity.filter.value:}")
-    private String activityFilterValue;
+    private String filterValue;
 
     @Value("${stream.activity.filter.name:}")
     private String activityFilterPropertyName;
@@ -189,12 +189,12 @@ class RabbitAmqpConsumerConfig {
                 .stream()
                 .offset(ConsumerBuilder.StreamOffsetSpecification.valueOf(offsetName));
 
-        if(!activityFilterPropertyName.isEmpty() && !activityFilterValue.isEmpty())
+        if(!activityFilterPropertyName.isEmpty() && !filterValue.isEmpty())
         {
-            log.info("Adding activity filter value: {}", activityFilterValue);
+            log.info("Adding activity filter value: {}", filterValue);
             builder = builder
                     .filter()
-                    .property(activityFilterPropertyName,activityFilterValue)
+                    .property(activityFilterPropertyName, filterValue)
                     .stream();
 
         }

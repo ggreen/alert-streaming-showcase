@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import nyla.solutions.core.patterns.repository.memory.ListRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import showcase.streaming.domains.Activity;
+import io.cloudNativeData.streaming.showcase.domains.Activity;
 
 import java.util.function.Consumer;
 

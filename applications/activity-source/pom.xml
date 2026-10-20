@@ -12,7 +12,7 @@
     </parent>
     <groupId>showcase.event.streaming</groupId>
     <artifactId>activity-source</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>activity-source</name>
     <description>activity-source</description>
     <properties>
@@ -53,9 +53,9 @@
             <version>3.0.0</version>
         </dependency>
         <dependency>
-            <groupId>showcase.streaming.event</groupId>
+            <groupId>io.cloudNativeData</groupId>
             <artifactId>domains</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.paho</groupId>

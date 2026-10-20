@@ -6,7 +6,7 @@ Start Application
 
 
 ```shell
-java -jar applications/alert-app/target/alert-app-0.0.1-SNAPSHOT.jar --stream.filter.sql="account = 'imani' AND level IN ('critical', 'high','medium','low')"
+java -jar applications/alert-app/target/alert-app-0.0.1.jar --stream.filter.sql="account = 'imani' AND level IN ('critical', 'high','medium','low')"
 ```
 
 

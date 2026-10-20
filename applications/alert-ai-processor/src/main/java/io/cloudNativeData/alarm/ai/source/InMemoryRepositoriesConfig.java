@@ -5,9 +5,7 @@ import nyla.solutions.core.patterns.repository.memory.ListRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import showcase.streaming.domains.Activity;
-
-import java.util.ArrayList;
+import io.cloudNativeData.streaming.showcase.domains.Activity;
 
 @Configuration
 public class InMemoryRepositoriesConfig {

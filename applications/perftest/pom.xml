@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>io.cloudnativedata</groupId>
 	<artifactId>perftest</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name/>
 	<description/>
 	<url/>
@@ -69,9 +69,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>showcase.streaming.event</groupId>
+			<groupId>io.cloudNativeData</groupId>
 			<artifactId>domains</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.1</version>
 		</dependency>
 	</dependencies>
 	<dependencyManagement>

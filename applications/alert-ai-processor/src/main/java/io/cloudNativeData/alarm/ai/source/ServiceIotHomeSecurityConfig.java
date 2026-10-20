@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import io.cloudNativeData.alarm.ai.source.service.ai.AlertsModelInference;
-import showcase.streaming.domains.AlertList;
+import io.cloudNativeData.streaming.showcase.domains.AlertList;
 
 @Configuration
 @Profile("iot")

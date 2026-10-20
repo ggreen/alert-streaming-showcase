@@ -8,9 +8,9 @@
         <version>4.1.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>showcase.alarm</groupId>
+	<groupId>io.cloudNativeData</groupId>
 	<artifactId>alert-ai-processor</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>alert-ai-source</name>
 	<description>alert-ai-source</description>
     <properties>
@@ -87,9 +87,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>showcase.streaming.event</groupId>
+            <groupId>io.cloudNativeData</groupId>
             <artifactId>domains</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -97,9 +97,9 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>showcase.streaming.event</groupId>
+            <groupId>io.cloudNativeData</groupId>
             <artifactId>domains</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.1</version>
         </dependency>
     </dependencies>
     <dependencyManagement>

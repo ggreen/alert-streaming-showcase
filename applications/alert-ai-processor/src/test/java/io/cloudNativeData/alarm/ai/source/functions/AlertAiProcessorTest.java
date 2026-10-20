@@ -7,8 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import io.cloudNativeData.alarm.ai.source.service.AlertDetectorService;
-import showcase.streaming.domains.Activity;
-import showcase.streaming.domains.Alert;
+import io.cloudNativeData.streaming.showcase.domains.Activity;
+import io.cloudNativeData.streaming.showcase.domains.Alert;
 
 import java.util.List;
 

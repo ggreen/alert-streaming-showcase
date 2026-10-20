@@ -19,7 +19,7 @@ Start Ollama
 2. Start MQTT 5 Source
 
 ```shell
-java -jar applications/http-source/target/http-source-0.0.1-SNAPSHOT.jar \
+java -jar applications/http-source/target/http-source-0.0.1.jar \
   --mqtt.connectionUrl=tcp://localhost:1883 \
   --spring.application.name=http-mqtt-source \
   --mqtt.userName=guest \
@@ -29,14 +29,14 @@ java -jar applications/http-source/target/http-source-0.0.1-SNAPSHOT.jar \
 3. Start Alarm app for all imani alerts
 
 ```shell
-java -jar applications/alert-app/target/alert-app-0.0.1-SNAPSHOT.jar --spring.rabbitmq.host=localhost --spring.rabbitmq.username=guest --spring.rabbitmq.password=guest --spring.cloud.stream.bindings.input.destination="amq.topic" --stream.destination="alerts.alert" --stream.exchange.bind.key="#"   --stream.filter.sql="account = 'imani' AND level IN ('critical', 'high','medium','low')" --server.port=8080 --stream.activity.filter.name="account" --stream.activity.filter.value="imani" --alert.refresh.rateSeconds=1
+java -jar applications/alert-app/target/alert-app-0.0.1.jar --spring.rabbitmq.host=localhost --spring.rabbitmq.username=guest --spring.rabbitmq.password=guest --spring.cloud.stream.bindings.input.destination="amq.topic" --stream.destination="alerts.alert" --stream.exchange.bind.key="#"   --stream.filter.sql="account = 'imani' AND level IN ('critical', 'high','medium','low')" --server.port=8080 --stream.activity.filter.name="account" --stream.activity.filter.value="imani" --alert.refresh.rateSeconds=1
 ```
 
 
 4. Start app CRITICAL ONLY alerts
 
 ```shell
-java -jar applications/alert-app/target/alert-app-0.0.1-SNAPSHOT.jar --spring.rabbitmq.host=localhost --spring.application.name="imani-critical" --spring.rabbitmq.username=guest --spring.rabbitmq.password=guest --spring.cloud.stream.bindings.input.destination="amq.topic" --stream.destination="alerts.alert" --stream.exchange.bind.key="#"   --stream.filter.sql="account = 'imani' AND level IN ('critical')" --server.port=8911 --stream.activity.filter.name="account" --stream.activity.filter.value="imani" --alert.refresh.rateSeconds=1
+java -jar applications/alert-app/target/alert-app-0.0.1.jar --spring.rabbitmq.host=localhost --spring.application.name="imani-critical" --spring.rabbitmq.username=guest --spring.rabbitmq.password=guest --spring.cloud.stream.bindings.input.destination="amq.topic" --stream.destination="alerts.alert" --stream.exchange.bind.key="#"   --stream.filter.sql="account = 'imani' AND level IN ('critical')" --server.port=8911 --stream.activity.filter.name="account" --stream.activity.filter.value="imani" --alert.refresh.rateSeconds=1
 ```
 
 5. Open RabbitMQ Management Dashboard
@@ -124,7 +124,7 @@ open http:///localhost:8911
 11. Start AMQP 1.0 Source
 
 ```shell
-java -jar applications/http-source/target/http-source-0.0.1-SNAPSHOT.jar \
+java -jar applications/http-source/target/http-source-0.0.1.jar \
   -spring.rabbitmq.host=localhost \
   --spring.application.name=activities-source \
   --spring.rabbitmq.username=guest \
@@ -243,7 +243,7 @@ Start AI Processor Application
 
 
 ```shell
-java -jar applications/alert-ai-processor/target/alert-ai-processor-0.0.1-SNAPSHOT.jar --stream.activity.filter.value=josiah --spring.profiles.active=finance --spring.ai.ollama.chat.options.model=llama3.2:latest --alerts.inference.batch=6
+java -jar applications/alert-ai-processor/target/alert-ai-processor-0.0.1.jar --stream.activity.filter.value=josiah --spring.profiles.active=finance --spring.ai.ollama.chat.options.model=llama3.2:latest --alerts.inference.batch=6
 ```
 
 ```shell
@@ -295,7 +295,7 @@ Start Josiah Alert App
 
 
 ```shell
-java -jar applications/alert-app/target/alert-app-0.0.1-SNAPSHOT.jar --spring.rabbitmq.host=localhost --spring.rabbitmq.username=guest --spring.rabbitmq.password=guest --spring.cloud.stream.bindings.input.destination="amq.topic" --stream.destination="alerts.alert" --stream.exchange.bind.key="#"   --stream.filter.sql="account = 'josiah' AND level IN ('critical', 'high','medium','low')" --server.port=8777 --stream.activity.filter.name="account" --stream.activity.filter.value="josiah" --alert.refresh.rateSeconds=1
+java -jar applications/alert-app/target/alert-app-0.0.1.jar --spring.rabbitmq.host=localhost --spring.rabbitmq.username=guest --spring.rabbitmq.password=guest --spring.cloud.stream.bindings.input.destination="amq.topic" --stream.destination="alerts.alert" --stream.exchange.bind.key="#"   --stream.filter.sql="account = 'josiah' AND level IN ('critical', 'high','medium','low')" --server.port=8777 --stream.activity.filter.name="account" --stream.activity.filter.value="josiah" --alert.refresh.rateSeconds=1
 ```
 
 ```shell
@@ -306,7 +306,7 @@ Start Josiah Alert App (critical alerts ONLY)
 
 
 ```shell
-java -jar applications/alert-app/target/alert-app-0.0.1-SNAPSHOT.jar --spring.rabbitmq.host=localhost --spring.rabbitmq.username=guest --spring.rabbitmq.password=guest --spring.cloud.stream.bindings.input.destination="amq.topic" --stream.destination="alerts.alert" --stream.exchange.bind.key="#"   --stream.filter.sql="account = 'josiah' AND level IN ('critical')" --server.port=8778 --stream.activity.filter.name="account" --stream.activity.filter.value="josiah" --alert.refresh.rateSeconds=1
+java -jar applications/alert-app/target/alert-app-0.0.1.jar --spring.rabbitmq.host=localhost --spring.rabbitmq.username=guest --spring.rabbitmq.password=guest --spring.cloud.stream.bindings.input.destination="amq.topic" --stream.destination="alerts.alert" --stream.exchange.bind.key="#"   --stream.filter.sql="account = 'josiah' AND level IN ('critical')" --server.port=8778 --stream.activity.filter.name="account" --stream.activity.filter.value="josiah" --alert.refresh.rateSeconds=1
 ```
 
 Open Web Application
@@ -322,7 +322,7 @@ Start Generator to demo existing applications do not get generated
 alerts and activities because of the RabbitMQ filtering.
 
 ```shell
-java -jar applications/generator-supplier-source/target/generator-supplier-source-0.0.1-SNAPSHOT.jar --spring.cloud.stream.bindings.input.producer.poller.fixed-delay=1 --spring.cloud.stream.poller.fixedDelay=1 --spring.cloud.stream.poller.max-messages=1000000
+java -jar applications/generator-supplier-source/target/generator-supplier-source-0.0.1.jar --spring.cloud.stream.bindings.input.producer.poller.fixed-delay=1 --spring.cloud.stream.poller.fixedDelay=1 --spring.cloud.stream.poller.max-messages=1000000
 ```
 
 

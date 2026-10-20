@@ -1,8 +1,8 @@
 package io.cloudNativeData.alarm.ai.source.service;
 
 import io.cloudNativeData.alarm.ai.source.domains.ProcessSummary;
-import showcase.streaming.domains.Activity;
-import showcase.streaming.domains.Alert;
+import io.cloudNativeData.streaming.showcase.domains.Activity;
+import io.cloudNativeData.streaming.showcase.domains.Alert;
 
 import java.util.List;
 

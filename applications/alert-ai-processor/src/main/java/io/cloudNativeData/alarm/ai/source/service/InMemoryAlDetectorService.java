@@ -2,19 +2,17 @@ package io.cloudNativeData.alarm.ai.source.service;
 
 import io.cloudNativeData.alarm.ai.source.domains.AlertRecord;
 import io.cloudNativeData.alarm.ai.source.domains.ProcessSummary;
-import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import nyla.solutions.core.data.collections.CapacityList;
 import nyla.solutions.core.patterns.repository.memory.ListRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import io.cloudNativeData.alarm.ai.source.service.ai.AlertsModelInference;
-import showcase.streaming.domains.Activity;
-import showcase.streaming.domains.Alert;
+import io.cloudNativeData.streaming.showcase.domains.Activity;
+import io.cloudNativeData.streaming.showcase.domains.Alert;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 

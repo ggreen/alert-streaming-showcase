@@ -29,6 +29,13 @@ class AlertAiProcessorTest {
         subject = new AlertAiProcessor(detectorService);
     }
 
+
+    @Test
+    void mustFilter() {
+
+
+    }
+
     @Test
     void givenActivity_with_small_activity_sample_size_when_apply_then_check_for_alerts() {
 

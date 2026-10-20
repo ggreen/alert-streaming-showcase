@@ -1,11 +1,9 @@
 package io.cloudNativeData.alarm.ai.source;
 
-import com.rabbitmq.stream.Environment;
 import com.rabbitmq.stream.OffsetSpecification;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.MessageListenerContainer;
-import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.function.context.config.JsonMessageConverter;
@@ -13,22 +11,20 @@ import org.springframework.cloud.function.json.JacksonMapper;
 import org.springframework.cloud.stream.config.ListenerContainerCustomizer;
 import org.springframework.cloud.stream.config.ProducerMessageHandlerCustomizer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.amqp.outbound.RabbitStreamMessageHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.MessageConverter;
-import org.springframework.rabbit.stream.config.StreamRabbitListenerContainerFactory;
 import org.springframework.rabbit.stream.listener.StreamListenerContainer;
 import org.springframework.rabbit.stream.producer.RabbitStreamTemplate;
 import org.springframework.rabbit.stream.support.StreamMessageProperties;
 import org.springframework.rabbit.stream.support.converter.StreamMessageConverter;
 import tools.jackson.databind.json.JsonMapper;
 
-@Configuration
+//@Configuration
 @Slf4j
-public class RabbitConfig {
+public class RabbitConfigNotWorking {
 
 
     @Value("${stream.activity.filter.value}")
@@ -38,11 +34,19 @@ public class RabbitConfig {
     private String filterPropName;
 
 
-    @Bean
+   @Bean
     ListenerContainerCustomizer<MessageListenerContainer> customizer() {
+        log.info("*******  starting: ListenerContainerCustomizer");
+
         return (cont, dest, group) -> {
+
+            log.info("******* Creating customizer!!! ********");
+
             StreamListenerContainer container = (StreamListenerContainer) cont;
             container.setConsumerCustomizer((name, builder) -> {
+
+                log.info("******* Calling ConsumerCustomizer!!! ********");
+
                 builder.filter().values(filterValue)
                         .postFilter( message ->
                                 {
@@ -59,7 +63,8 @@ public class RabbitConfig {
             // ...
         };
     }
-/*
+
+    /*
     @Bean
     RabbitListenerContainerFactory<StreamListenerContainer> nativeFactory(Environment env) {
         StreamRabbitListenerContainerFactory factory = new StreamRabbitListenerContainerFactory(env);
@@ -80,7 +85,7 @@ public class RabbitConfig {
         });
         return factory;
     }
-*/
+    */
 
     @Bean
     org.springframework.messaging.converter.MessageConverter messageConverter(JsonMapper objectMapper)

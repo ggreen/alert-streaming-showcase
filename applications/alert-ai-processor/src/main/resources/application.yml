@@ -31,49 +31,49 @@ spring:
         time-out: 5m
         max-retries: 1
   #          model: llama3.1:8b
-  cloud:
-    function:
-      definition: alertAiProcessor
-    stream:
-      function:
-        bindings:
-          alertAiProcessor-in-0: input
-          alertAiProcessor-out-0: output
-      binder:
-        connection-name-prefix: ${spring.application.name}
-      default:
-        contentType: "application/json"
-      bindings:
-        input:
-          destination: activities.activity
-          group: activities.activity
-          consumer:
-            concurrency: 1
-#        loadRepositoryConsumer-in-0:
+#  cloud:
+#    function:
+#      definition: alertAiProcessor
+#    stream:
+#      function:
+#        bindings:
+#          alertAiProcessor-in-0: input
+#          alertAiProcessor-out-0: output
+#      binder:
+#        connection-name-prefix: ${spring.application.name}
+#      default:
+#        contentType: "application/json"
+#      bindings:
+#        input:
 #          destination: activities.activity
 #          group: activities.activity
-        output:
-          destination: alerts.alert
-          group: alerts.alert
-#        checkForAlerts-out-0:
+#          consumer:
+#            concurrency: 1
+##        loadRepositoryConsumer-in-0:
+##          destination: activities.activity
+##          group: activities.activity
+#        output:
 #          destination: alerts.alert
 #          group: alerts.alert
-      rabbit:
-        bindings:
-#          loadRepositoryConsumer-in-0:
+##        checkForAlerts-out-0:
+##          destination: alerts.alert
+##          group: alerts.alert
+#      rabbit:
+#        bindings:
+##          loadRepositoryConsumer-in-0:
+##            consumer:
+##              containerType: STREAM
+##              queueNameGroupOnly: true
+##              autoBindDlq: true
+#          input:
 #            consumer:
 #              containerType: STREAM
 #              queueNameGroupOnly: true
 #              autoBindDlq: true
-          input:
-            consumer:
-              containerType: STREAM
-              queueNameGroupOnly: true
-              autoBindDlq: true
-          output:
-            producer:
-              producerType: STREAM_SYNC
-              queueNameGroupOnly: true
+#          output:
+#            producer:
+#              producerType: STREAM_SYNC
+#              queueNameGroupOnly: true
 #          checkForAlerts-out-0:
 #            producer:
 #              producerType: STREAM_SYNC

@@ -155,7 +155,7 @@
                     <span>Active Engine</span>
                 </h3>
                 <p class="text-[11px] text-slate-500" id="aiStatusSubtext">Analyzing events in real-time.</p>
-                <span class="text-sm font-bold text-white group-hover:text-blue-300 transition">Filtering ${filterPropName}=${filterValue}</span>
+                <span class="text-sm font-bold text-white group-hover:text-blue-300 transition">Filter Value =git s${filterValue}</span>
             </div>
             <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl">
                 <i class="fa-solid fa-brain"></i>

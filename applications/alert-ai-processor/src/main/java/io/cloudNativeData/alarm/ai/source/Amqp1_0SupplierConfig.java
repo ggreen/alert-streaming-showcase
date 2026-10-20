@@ -39,7 +39,10 @@ public class Amqp1_0SupplierConfig {
     private String password;
 
     @Value("${spring.cloud.stream.bindings.output.destination:activities.activity}")
-    private String streamName;
+    private String inputStream;
+
+    @Value("${spring.cloud.stream.bindings.output.destination:alerts.alert}")
+    private String outputStream;
 
     @Value("${spring.cloud.stream.default.contentType:application/json}")
     private String contentType;
@@ -64,7 +67,7 @@ public class Amqp1_0SupplierConfig {
     com.rabbitmq.client.amqp.Publisher amqpPublisher(Connection connection) {
         return  connection
                 .publisherBuilder()
-                .queue(streamName)
+                .queue(outputStream)
                 .build();
     }
 
@@ -84,7 +87,7 @@ public class Amqp1_0SupplierConfig {
 
             amqpPublisher.publish(msg, context -> {});
 
-            log.info("published alert:{}", alert);
+            log.info("published alert:{} to stream: {}", alert,outputStream);
         };
     }
 
@@ -121,10 +124,10 @@ public class Amqp1_0SupplierConfig {
     {
         // do not forget to build the instance!
 
-        log.info("streamName: {}, filterValue: {}",streamName, filterValue  );
+        log.info("Consuming from input stream: {}, filterValue: {}", inputStream, filterValue  );
 
         return connection.consumerBuilder().
-                queue(streamName)
+                queue(inputStream)
                 .stream()
                 .filterValues(filterValue)
                 .filterMatchUnfiltered(true)

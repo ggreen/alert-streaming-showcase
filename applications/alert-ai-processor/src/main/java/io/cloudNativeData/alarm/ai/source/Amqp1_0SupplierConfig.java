@@ -145,12 +145,10 @@ public class Amqp1_0SupplierConfig {
 
                     var listOfAlerts = processor.apply(activity);
 
-                    if(listOfAlerts == null || listOfAlerts.isEmpty()) {
-                        return;
-                    }
-
-                    for(var alert: listOfAlerts) {
-                        publisher.send(alert);
+                    if(listOfAlerts != null && !listOfAlerts.isEmpty()) {
+                        for(var alert: listOfAlerts) {
+                            publisher.send(alert);
+                        }
                     }
 
                     context.accept(); // settle the message

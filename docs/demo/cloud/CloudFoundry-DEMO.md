@@ -1,7 +1,9 @@
-# Payments Alert SQL Demo
+# Tanzu Platform RabbitMQ Event Streaming Demo
 
 
-5. Open RabbitMQ Management Dashboard
+![img.png](img.png)
+
+## 1. Open RabbitMQ Management Dashboard
 
 ```shell
 cf create-service-key rabbitmq rabbit-key -c '{"tags": "administrator"}'
@@ -21,7 +23,7 @@ open $RABBIT_URL
 
 ----------------
 
-Queues Queues
+## 2. Create Queues
 
 ```shell
 ./deployment/cloud/cloudFoundry/scripts/delete-queues.sh
@@ -39,9 +41,7 @@ cf restart activity-source
 
 ----------------
 
-# Post Alerts
-
-5. Open Activities & Alert Security Monitor App 
+## 3. Open Activities & Alert Security Monitor App 
 
 
 ```shell
@@ -50,7 +50,7 @@ echo opening $ALERT_APP_URL
 open https://$ALERT_APP_URL
 ```
 
-6. Post critical alerts
+## 4. Post critical alerts
 
 
 ```shell
@@ -62,7 +62,7 @@ open https://$ALERT_ALL_URL
 
 
 
-9. Only Critical
+## 5. Open Only Critical Alerts
 
 ```shell
 ALERT_CRITICAL_URL=`cf apps | awk '$1 == "alert-critical" {print $NF}'`
@@ -71,12 +71,8 @@ echo opening $ALERT_CRITICAL_URL
 open https://$ALERT_CRITICAL_URL
 ```
 
------------------------------
 
-
-
-
-11. Publish Activity
+## 6.  Publish Activity
 
 ```shell
 ACTIVITY_URL_SOURCE=`cf apps | awk '$1 == "activity-source" {print $NF}'`
@@ -85,7 +81,7 @@ open http://$ACTIVITY_URL_SOURCE
 ```
 
 
-11. Restart Apps for Data as Service
+## 7.  Restart Apps for Data as Service
 
 Data as a service
 ```shell
@@ -101,7 +97,22 @@ Review Logs
 
 
 
-# Artificial Intelligence
+## 8. Open AI Agent Processor
+
+```shell
+ALERT_AI_PROCESSOR_URL=`cf apps | awk '$1 == "alert-ai-processor" {print $NF}'`
+echo opening $ALERT_AI_PROCESSOR_URL
+open https://$ALERT_AI_PROCESSOR_URL
+```
+
+Click Simulate Fraud in Activity Source
+
+```shell
+ACTIVITY_URL_SOURCE=`cf apps | awk '$1 == "activity-source" {print $NF}'`
+echo opening $ACTIVITY_URL_SOURCE
+open http://$ACTIVITY_URL_SOURCE
+```
+
 
 
 The following is an example prompt used for fraud
@@ -118,18 +129,6 @@ ONLY RESPONSE the Json Object fields level, time, and event
 
 Example
 
-```json
-[
-  { "icon" : "fa-credit-card",  "account" : "josiah", "time" : "07:15 PM", "activity" : "type: SALE, pan: 4111XXXXXX1111, amount: 100.00, date: '1-7-2026 19:12:34' terminal_id: TERM_88291, merchant_id: MERCH_55432"},
-  { "icon" : "fa-credit-card",  "account" : "josiah", "time" : "07:17 PM", "activity" : "type: SALE, pan: 4111XXXXXX1111, amount: 1000.01, date: '1-7-2026 19:17:32' terminal_id: TERM_88291, merchant_id: MERCH_5555"},
-  { "icon" : "fa-credit-card",  "account" : "josiah", "time" : "07:19 PM", "activity" : "type: SALE, pan: 4111XXXXXX1111, amount: 1.01, date: '1-7-2026 19:19:32' terminal_id: TERM_88291, merchant_id: MERCH_55432"},
-  { "icon" : "fa-credit-card",  "account" : "josiah", "time" : "07:17 PM", "activity" : "type: SALE, pan: 4111XXXXXX1111, amount: 0.01, date: '1-7-2026 19:17:32' terminal_id: TERM_88291, merchant_id: MERCH_55432"},
-  { "icon" : "fa-credit-card",  "account" : "josiah", "time" : "07:19 PM", "activity" : "type: SALE, pan: 4111XXXXXX1111, amount: 1.01, date: '1-7-2026 19:19:32' terminal_id: TERM_88291, merchant_id: MERCH_55432"},
-  { "icon" : "fa-credit-card",  "account" : "josiah", "time" : "07:20 PM", "activity" : "type: SALE, pan: 4111XXXXXX1111, amount: 5.01, date: '1-7-2026 19:20:32' terminal_id: TERM_88291, merchant_id: MERCH_5555"},
-  { "icon" : "fa-credit-card",  "account" : "josiah", "time" : "07:15 PM", "activity" : "type: SALE, pan: 4111XXXXXX1111, amount: 100.00, date: '1-7-2026 19:12:34' terminal_id: TERM_88291, merchant_id: MERCH_55432"}
-]
-```
-
 ```text
 Use Context Below
 CONTEXT:
@@ -141,27 +140,10 @@ Activities with merchant_id: MERCH_5555 and amount less than 10 is LOW alert, if
 Activities for the same account from one more than 1 terminal_id greater than a 1-minute time difference is not an alert
 
 ```
-----------------------
-
-Open AI Agent Processor
 
 
-```shell
-ALERT_AI_PROCESSOR_URL=`cf apps | awk '$1 == "alert-ai-processor" {print $NF}'`
-echo opening $ALERT_AI_PROCESSOR_URL
-open https://$ALERT_AI_PROCESSOR_URL
-```
 
-Click Similar Fraud in Activity Source
-
-```shell
-ACTIVITY_URL_SOURCE=`cf apps | awk '$1 == "activity-source" {print $NF}'`
-echo opening $ACTIVITY_URL_SOURCE
-open http://$ACTIVITY_URL_SOURCE
-```
-
-
-Start Josiah Alert App
+## 9. Start Josiah Alert App
 
 
 ```shell
@@ -172,7 +154,7 @@ open https://$ALERT_JOSIAH_URL_SOURCE
 ```
 
 
-10. Generator Activities
+## 10.  Generator Activities
 
 Start Generator to demo existing applications do not get generated
 alerts and activities because of the RabbitMQ filtering.
